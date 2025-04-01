@@ -48,14 +48,29 @@ class CPU{
 		uint16_t retrieve_register_16(registerCalls);
 
 		uint8_t retrieve_register_8(registerCalls);
-		//ld operation
-		void ld(registerCalls a, registerCalls b);
-		void ld(registerCalls, uint8_t);
-		void ld(registerCalls, uint16_t);
-		void ld(address, registerCalls);
-		//void ld_indirect(registerCalls address_register, registerCalls reg);
-		//void ld_indirect(registerCalls reg, registerCalls address_register);
-			
+
+		//ld operations
+		void ldr8r8(registerCalls a, registerCalls b);
+		void ldr8n8(registerCalls, uint8_t);
+		void ldr16n16(registerCalls, uint16_t);
+		void ldhlr8(registerCalls);
+		void ldhln8(uint8_t);
+		void ldr8hl(registerCalls);
+		void ldr16a(registerCalls);
+		void ldn16a(uint16_t);
+		void ldhn16a(uint16_t);
+		void ldhac();
+		void ldhlia();
+		void ldhlda();
+		void ldahld();
+		void ldahli();
+		void ldspn16(uint16_t);
+		void ldn16sp(uint16_t);
+		void ldhlspe8(int16_t e8);
+		void ldsphl();
+
+		void NOP();
+
 		// arithmetic operations
 		//add
 		void add(registerCalls, registerCalls);
