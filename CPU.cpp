@@ -2,6 +2,26 @@
 #include <iostream>
 
 //every function is required to check for interrupts before then after.
+static void print_binary(uint8_t n) {
+	unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
+
+	// Loop through all bits
+	for (int i = 0; i < sizeof(n) * 8; i++) {
+		// Print the current bit
+		putchar((n & mask) ? '1' : '0');
+
+		// Shift the mask to the right
+		mask >>= 1;
+
+		// Print space every 8 bits (optional for better readability)
+		if ((i + 1) % 8 == 0) {
+			putchar(' ');
+		}
+	}
+	putchar('\n');
+}
+
+
 
 void CPU::inititialise() {
 	A = 0;
@@ -127,6 +147,22 @@ uint8_t CPU::retrieve_register_8(registerCalls a) {
 	}
 }
 
+bool CPU::half_carry(uint8_t a, uint8_t b){
+	return ((a & 0x0F) + (b & 0x0F) > 0x0F);
+}
+
+bool CPU::half_carry(uint16_t a , uint16_t b){
+	return ((a & 0xFFF) + (b & 0xFFF) > 0xFFF);
+}
+
+bool CPU::full_carry(uint8_t a, uint8_t b){
+	return (a + b > 0xFF);
+}
+
+bool CPU::full_carry(uint16_t a , uint16_t b){
+	return (a + b > 0xFFFF);
+}
+
 uint16_t CPU::retrieve_register_16(registerCalls a) {
 	if (!is_16_bit(a)) {
 		std::cout << "trying to retrieve 16 bits from 8\n";
@@ -160,7 +196,8 @@ uint16_t CPU::retrieve_register_16(registerCalls a) {
 
 void CPU::print_registers() {
 	std::cout << "Registers Report\n";
-	printf("\tA: %d\n\tB: %d\n\tC: %d\n\tD: %d\n\tE: %d\n\tH: %d\n\tL: %d\n\tF: %d\n\tSP: %d\n\tPC: %d\n",A,B,C,D,E,H,L,F,SP,PC);
+	printf("\tA: %d\n\tB: %d\n\tC: %d\n\tD: %d\n\tE: %d\n\tH: %d\n\tL: %d\n\tSP: %d\n\tPC: %d\n\tF: ",A,B,C,D,E,H,L,SP,PC);
+	print_binary(F);
 }
 
 
@@ -215,27 +252,27 @@ void CPU::ldhac() {
 void CPU::ldhlia() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	address_space.write(ad, A);
-	inc(registerCalls::HL);
+	//inc(registerCalls::HL);
 }
 
 void CPU::ldhlda() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	address_space.write(ad, A);
-	dec(registerCalls::HL);
+	//dec(registerCalls::HL);
 }
 
 void CPU::ldahld() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	store_in_register(registerCalls::A, temp);
-	dec(registerCalls::A);
+	//dec(registerCalls::A);
 }
 
 void CPU::ldahli() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	store_in_register(registerCalls::A, temp);
-	inc(registerCalls::A);
+	//inc(registerCalls::A);
 }
 
 void CPU::ldspn16(uint16_t a) {
@@ -255,14 +292,17 @@ void CPU::arithmetic_test() {
 	print_registers();
 	ldr8r8(registerCalls::B, registerCalls::A);
 	print_registers();
+	addar8(registerCalls::B);
+	print_registers();
 }
 
 void CPU::ldhlspe8(int16_t e8) {
 	int16_t signed_e8 = static_cast<int16_t>(e8);
-	uint16_t result = SP + signed_e8;
+	int16_t result = SP + signed_e8;
 
-	store_in_register(registerCalls::HL, result);
-	F = 0; // Z and N are always 0
+	store_in_register(registerCalls::HL, static_cast<uint16_t>(result));
+	set_zero(false);
+	set_n(false);// Z and N are always 0
 
 	//checking half carry
 	if (((SP & 0xF) + (signed_e8 & 0xF)) > 0xF) F |= 0b00001000; 
@@ -276,9 +316,177 @@ void CPU::ldsphl() {
 	SP = temp;
 }
 
+
 void CPU::NOP() {
 	//nothing
 }
+
+bool CPU::get_carry() {
+	return 0b00010000 & F;
+}
+
+void CPU::set_carry(bool a){
+	if (a) {
+		F |= 0b00010000;
+	}
+	else {
+		F ^= 0b00010000;
+	}
+}
+
+bool CPU::get_half_carry() {
+	return 0b00001000 & F;
+}
+
+void CPU::set_half_carry(bool a){
+	if (a) {
+		F |= 0b00001000;
+	}
+	else {
+		F ^= 0b00001000;
+	}
+}
+
+
+bool CPU::get_zero(){
+	return 0b00000010 & F;
+}
+
+void CPU::set_zero(bool a) {
+	if (a) {
+		F |= 0b00000010;
+	}
+	else {
+		F ^= 0b00000010;
+	}
+}
+
+void CPU::set_n(bool a){
+	if (a) {
+		F |= 0b00000100;
+	}
+	else {
+		F ^= 0b00000100;
+	}
+}
+
+bool CPU::get_n(){
+	return F & 0b00000100;
+}
+
+
+void CPU::adcar8(registerCalls a){
+	uint8_t temp = retrieve_register_8(a);
+	bool carry = get_carry();
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp + carry;
+}
+
+void CPU::adcahl(){
+	uint16_t add = retrieve_register_8(registerCalls::HL);
+	uint8_t temp = address_space.read(add);
+	bool carry = get_carry();
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp + carry;
+}
+
+void CPU::adcan8(uint8_t temp){
+	bool carry = get_carry();
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp + carry;
+}
+
+void CPU::addar8(registerCalls a){
+	uint8_t temp = retrieve_register_8(a);
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp;
+}
+
+void CPU::addahl(){
+	uint16_t add = retrieve_register_8(registerCalls::HL);
+	uint8_t temp = address_space.read(add);
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp;
+}
+
+void CPU::addan8(uint8_t temp){
+	if (full_carry(temp + get_carry(), A)) {
+		set_carry(true);
+	}
+	if (half_carry(temp + get_carry(), A)) {
+		set_half_carry(true);
+	}
+	A += temp;
+}
+
+void CPU::addhlr16(registerCalls val){
+	uint16_t hl = retrieve_register_16(registerCalls::HL);
+	uint16_t temp = retrieve_register_16(val);
+	store_in_register(registerCalls::HL, (uint16_t)(hl + temp));
+	if (half_carry(hl, temp)) {
+		set_half_carry(true);
+	}
+
+	if (full_carry(hl, temp)) {
+		set_carry(true);
+	}
+	set_zero(false);
+}
+
+void CPU::addhlsp(){
+	uint16_t temp = SP;
+	uint16_t hl = retrieve_register_16(registerCalls::HL);
+	store_in_register(registerCalls::HL, (uint16_t)(hl + temp));
+	if (half_carry(hl, temp)) {
+		set_half_carry(true);
+	}
+
+	if (full_carry(hl, temp)) {
+		set_carry(true);
+	}
+	set_zero(false);
+}
+
+void CPU::addspe8(int8_t e8){
+	int16_t s = e8 + SP;
+	SP = s;
+	set_zero(false);
+	set_n(false);
+	if (((SP & 0xF) + (e8 & 0xF)) > 0xF) F |= 0b00001000;
+
+	//checking full carry
+	if (((SP & 0xFF) + (e8 & 0xFF)) > 0xFF) F |= 0b00010000;
+
+}
+
+
+
+
 
 CPU::CPU(AddressSpace& addressSpace): address_space(addressSpace) {
 

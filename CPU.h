@@ -40,6 +40,24 @@ class CPU{
 // interrupt_check
 		bool interrupt_received();
 
+// flag operations
+		static bool full_carry(uint8_t, uint8_t);
+		static bool full_carry(uint16_t, uint16_t);
+		bool get_carry();
+		void set_carry(bool);
+
+		static bool half_carry(uint8_t, uint8_t);
+		static bool half_carry(uint16_t, uint16_t);
+		bool get_half_carry();
+		void set_half_carry(bool);
+
+		bool get_zero();
+		void set_zero(bool);
+
+		void set_n(bool);
+		bool get_n();
+		
+
 //operations
 		void store_in_register(registerCalls, uint16_t n16);
 
@@ -48,6 +66,7 @@ class CPU{
 		uint16_t retrieve_register_16(registerCalls);
 
 		uint8_t retrieve_register_8(registerCalls);
+
 
 		//ld operations
 		void ldr8r8(registerCalls a, registerCalls b);
@@ -73,12 +92,16 @@ class CPU{
 
 		// arithmetic operations
 		//add
-		void add(registerCalls, registerCalls);
-		void add(registerCalls, int);
-		void add_indirect(registerCalls, registerCalls);
-		void adc(registerCalls, registerCalls);
-		void adc_indirect(registerCalls, registerCalls);
-		void addc(registerCalls, int);
+		void adcar8(registerCalls a);
+		void adcahl();
+		void adcan8(uint8_t val);
+		void addar8(registerCalls a);
+		void addahl();
+		void addan8(uint8_t val);
+		void addhlr16(registerCalls a);
+		void addhlsp();
+		void addspe8(int8_t e8);
+
 
 		//sub
 		void sub(registerCalls, registerCalls);
@@ -109,12 +132,15 @@ class CPU{
 		void cp_indirect(registerCalls, registerCalls);
 
 		//increment
-		void inc(registerCalls);
-		void inc_indirect(registerCalls);
+		void incr8(registerCalls);
+		void inchl();
+		void incr16(registerCalls);
 
 		// decrmenet
-		void dec(registerCalls);
-		void dec_indirect(registerCalls);
+		void decr8(registerCalls);
+		void dechl();
+		void decr16(registerCalls);
+		void decsp();
 
 		void print_registers();
 
