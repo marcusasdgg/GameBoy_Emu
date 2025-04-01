@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include<cstdint>
@@ -45,6 +46,7 @@ class CPU{
 		static bool full_carry(uint16_t, uint16_t);
 		bool get_carry();
 		void set_carry(bool);
+		bool get_borrow();
 
 		static bool half_carry(uint8_t, uint8_t);
 		static bool half_carry(uint16_t, uint16_t);
@@ -135,6 +137,7 @@ class CPU{
 		void incr8(registerCalls);
 		void inchl();
 		void incr16(registerCalls);
+		void incsp();
 
 		// decrmenet
 		void decr8(registerCalls);

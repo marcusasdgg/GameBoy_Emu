@@ -21,7 +21,9 @@ static void print_binary(uint8_t n) {
 	putchar('\n');
 }
 
+CPU::CPU(AddressSpace& addressSpace) : address_space(addressSpace) {
 
+}
 
 void CPU::inititialise() {
 	A = 0;
@@ -294,6 +296,10 @@ void CPU::arithmetic_test() {
 	print_registers();
 	addar8(registerCalls::B);
 	print_registers();
+	decr8(registerCalls::A);
+	print_registers();
+	incr8(registerCalls::A);
+	print_registers();
 }
 
 void CPU::ldhlspe8(int16_t e8) {
@@ -348,6 +354,7 @@ void CPU::set_half_carry(bool a){
 }
 
 
+
 bool CPU::get_zero(){
 	return 0b00000010 & F;
 }
@@ -385,6 +392,7 @@ void CPU::adcar8(registerCalls a){
 		set_half_carry(true);
 	}
 	A += temp + carry;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::adcahl(){
@@ -398,6 +406,7 @@ void CPU::adcahl(){
 		set_half_carry(true);
 	}
 	A += temp + carry;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::adcan8(uint8_t temp){
@@ -409,6 +418,7 @@ void CPU::adcan8(uint8_t temp){
 		set_half_carry(true);
 	}
 	A += temp + carry;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::addar8(registerCalls a){
@@ -420,6 +430,7 @@ void CPU::addar8(registerCalls a){
 		set_half_carry(true);
 	}
 	A += temp;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::addahl(){
@@ -432,6 +443,7 @@ void CPU::addahl(){
 		set_half_carry(true);
 	}
 	A += temp;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::addan8(uint8_t temp){
@@ -442,6 +454,7 @@ void CPU::addan8(uint8_t temp){
 		set_half_carry(true);
 	}
 	A += temp;
+	if (A == 0) set_zero(true);
 }
 
 void CPU::addhlr16(registerCalls val){
@@ -488,6 +501,70 @@ void CPU::addspe8(int8_t e8){
 
 
 
-CPU::CPU(AddressSpace& addressSpace): address_space(addressSpace) {
 
+
+void CPU::incr8(registerCalls a){
+	uint8_t temp = retrieve_register_8(a);
+	store_in_register(a, (uint8_t)(temp + 1));
+	if (half_carry(temp, 1)) {
+		set_half_carry(true);
+	}
+	temp = retrieve_register_8(a);
+	set_n(false);
+	if (temp == 0) {
+		set_zero(true);
+	}
+	
+}
+
+void CPU::inchl(){
+	uint16_t ad = retrieve_register_16(registerCalls::HL);
+	uint8_t temp = address_space.read(ad);
+	address_space.write(ad, temp + 1);
+	if (half_carry(temp, 1)) set_half_carry(true);
+	if (address_space.read(ad) == 0) set_zero(true);
+	set_n(false);
+}
+
+void CPU::incr16(registerCalls a){
+	uint16_t temp = retrieve_register_16(a) + 1;
+	store_in_register(a, temp);
+}
+
+void CPU::incsp() {
+	SP += 1;
+}
+
+void CPU::decr8(registerCalls a){
+	uint8_t temp = retrieve_register_8(a);
+	store_in_register(a, (uint8_t)(temp - 1));
+	if ((temp & 0xF) == 0) {
+		set_half_carry(true);
+	}
+	temp = retrieve_register_8(a);
+	set_n(false);
+	if (temp == 0) {
+		set_zero(true);
+	}
+	set_n(true);
+}
+
+void CPU::dechl(){
+	uint16_t ad = retrieve_register_16(registerCalls::HL);
+	uint8_t temp = address_space.read(ad);
+	if ((temp & 0xF) == 0) {
+		set_half_carry(true);
+	}
+	address_space.write(ad, temp - 1);
+	if (address_space.read(ad) == 0) set_zero(true);
+	set_n(true);
+}
+
+void CPU::decr16(registerCalls a){
+	uint8_t temp = retrieve_register_8(a) -1;
+	store_in_register(a, temp);
+}
+
+void CPU::decsp(){
+	SP -= 1;
 }
