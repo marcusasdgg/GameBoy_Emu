@@ -132,7 +132,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
+    <ClCompile Include="arithmetic.cpp" />
+    <ClCompile Include="bitwise_logic.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

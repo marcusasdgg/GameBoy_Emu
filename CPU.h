@@ -46,12 +46,13 @@ class CPU{
 		static bool full_carry(uint16_t, uint16_t);
 		bool get_carry();
 		void set_carry(bool);
-		bool get_borrow();
+		bool borrow(uint8_t temp, uint8_t temp2);
 
 		static bool half_carry(uint8_t, uint8_t);
 		static bool half_carry(uint16_t, uint16_t);
 		bool get_half_carry();
 		void set_half_carry(bool);
+		static bool half_borrow(uint8_t temp, uint8_t temp2);
 
 		bool get_zero();
 		void set_zero(bool);
@@ -80,6 +81,10 @@ class CPU{
 		void ldr16a(registerCalls);
 		void ldn16a(uint16_t);
 		void ldhn16a(uint16_t);
+		void ldhca();
+		void ldar16(registerCalls a);
+		void ldan16(uint16_t val);
+		void ldhan16(uint16_t val);
 		void ldhac();
 		void ldhlia();
 		void ldhlda();
@@ -106,32 +111,12 @@ class CPU{
 
 
 		//sub
-		void sub(registerCalls, registerCalls);
-		void sub(registerCalls, int);
-		void sub_indirect(registerCalls, registerCalls);
-		void subc(registerCalls, registerCalls);
-		void subc_indirect(registerCalls, registerCalls);
-		void subc(registerCalls, int);
-
-		// and
-		void andd(registerCalls, registerCalls);
-		void andd(registerCalls, bool);
-		void andd_indirect(registerCalls, registerCalls);
-
-		// OR
-		void orr(registerCalls, registerCalls);
-		void orr(registerCalls, bool);
-		void orr_indirect(registerCalls, registerCalls);
-
-		// XOR
-		void xorr(registerCalls, registerCalls);
-		void xorr(registerCalls, bool);
-		void xorr_indirect(registerCalls, registerCalls);
-
-		// CP
-		void cp(registerCalls, registerCalls);
-		void cp(registerCalls, bool);
-		void cp_indirect(registerCalls, registerCalls);
+		void subar8(registerCalls a);
+		void subahl();
+		void suban8(uint8_t val);
+		void sbcar8(registerCalls a);
+		void sbcahl();
+		void sbcn8(uint8_t);
 
 		//increment
 		void incr8(registerCalls);
@@ -155,7 +140,7 @@ class CPU{
 
 		void inititialise();
 
-		void execute(std::vector<byte>);
+		void execute(uint16_t start_ptr);
 
 		void arithmetic_test();
 
