@@ -41,5 +41,17 @@
     <ClCompile Include="bitwise_logic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="bitflag.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="bitshift.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="jump_subroutine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="block_reading.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

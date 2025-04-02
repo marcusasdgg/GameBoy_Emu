@@ -89,14 +89,14 @@ void CPU::ldahld() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	store_in_register(registerCalls::A, temp);
-	//dec(registerCalls::A);
+	decr16(registerCalls::HL);
 }
 
 void CPU::ldahli() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	store_in_register(registerCalls::A, temp);
-	//inc(registerCalls::A);
+	incr16(registerCalls::HL);
 }
 
 void CPU::ldspn16(uint16_t a) {

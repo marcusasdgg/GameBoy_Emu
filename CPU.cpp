@@ -204,6 +204,28 @@ void CPU::print_registers() {
 	print_binary(F);
 }
 
+uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
+	uint8_t opcode = address_space.read(program_counter);
+	uint8_t block = opcode >> 6;
+	switch (block) {
+		case 0:
+			break;
+		case 1:
+			break;
+		case 2:
+			break;
+		case 3:
+			break;
+	}
+	return 0;
+}
+
+uint8_t CPU::get_bit_range(uint8_t value, uint8_t start, uint8_t end){
+	uint8_t n = end - start + 1;
+	uint8_t bitmask = (1 << n) - 1;
+	return (value >> start) & bitmask;
+}
+
 
 
 void CPU::arithmetic_test() {
@@ -230,9 +252,6 @@ void CPU::arithmetic_test() {
 
 
 
-void CPU::NOP() {
-	//nothing
-}
 
 bool CPU::get_carry() {
 	return 0b00010000 & F;

@@ -133,8 +133,12 @@
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
     <ClCompile Include="arithmetic.cpp" />
+    <ClCompile Include="bitflag.cpp" />
+    <ClCompile Include="bitshift.cpp" />
     <ClCompile Include="bitwise_logic.cpp" />
+    <ClCompile Include="block_reading.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="jump_subroutine.cpp" />
     <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
