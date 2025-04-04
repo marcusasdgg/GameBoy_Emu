@@ -10,7 +10,6 @@ int main() {
 	CPU cpu(addr, ck);
 	ck.start_clock();
 	cpu.inititialise();
-
-	cpu.arithmetic_test();
+	cpu.execute();
 	while (true);
 }

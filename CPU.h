@@ -114,7 +114,7 @@ class CPU{
 		void ldsphl();
 		void ldhan8(uint8_t val);
 		void ldhn8a(uint8_t val);
-
+		//23
 
 		// arithmetic operations
 		//add
@@ -127,7 +127,7 @@ class CPU{
 		void addhlr16(registerCalls a);
 		void addhlsp();
 		void addspe8(int8_t e8);
-
+		//9
 
 		//sub
 		void subar8(registerCalls a);
@@ -136,24 +136,28 @@ class CPU{
 		void sbcar8(registerCalls a);
 		void sbcahl();
 		void sbcn8(uint8_t);
+		//6
 
 		//increment
 		void incr8(registerCalls);
 		void inchl();
 		void incr16(registerCalls);
 		void incsp();
+		//4
 
 		// decrmenet
 		void decr8(registerCalls);
 		void dechl();
 		void decr16(registerCalls);
 		void decsp();
+		//4
 
 		// compare functions
 		void cpar8(registerCalls a);
 		void cpahl();
 		void cpan8(uint8_t val);
 		void cpl();
+		//4
 
 		//bitwise logic
 		void andar8(registerCalls);
@@ -165,6 +169,7 @@ class CPU{
 		void xorar8(registerCalls);
 		void xorahl();
 		void xoran8(uint8_t);
+		//9
 
 		//bitflag instructions
 		void bitu3r8(uint8_t bit, registerCalls a);
@@ -173,6 +178,7 @@ class CPU{
 		void resu3hl(uint8_t);
 		void setu3r8(uint8_t, registerCalls);
 		void setu3hl(uint8_t);
+		//6
 
 		// bit shift instructions
 		void rlr8(registerCalls);
@@ -195,6 +201,7 @@ class CPU{
 		void srlhl();
 		void swapr8(registerCalls);
 		void swaphl();
+		//20
 
 		//jump and subroutine
 		void calln16(uint16_t val);
@@ -207,6 +214,7 @@ class CPU{
 		void retcc(Cond c);
 		void ret();
 		void reti();
+		//10
 
 		// if rst vector i.e 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, and 0x38 jump
 		void rstvec(uint8_t val);
@@ -264,7 +272,6 @@ class CPU{
 
 		void execute(uint16_t start_ptr = 0);
 
-		void stop();
 		// aint gonna work with jumps
 		void execute_single(std::vector<byte>);
 
