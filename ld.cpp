@@ -57,10 +57,10 @@ void CPU::ldar16(registerCalls a) {
 	A = val;
 }
 
-void CPU::ldan16(uint16_t val) {
-	uint8_t temp = address_space.read(val);
-	A = temp;
-}
+	void CPU::ldan16(uint16_t val) {
+		uint8_t temp = address_space.read(val);
+		A = temp;
+	}
 
 void CPU::ldhan16(uint16_t val) {
 	if (val <= 0xFFFF && val >= 0xFF00) {
@@ -131,4 +131,15 @@ void CPU::ldhlspe8(int16_t e8) {
 void CPU::ldsphl() {
 	int temp = retrieve_register_16(registerCalls::HL);
 	SP = temp;
+}
+
+void CPU::ldhan8(uint8_t val){
+	uint16_t ad = 0xFF00 + val;
+	uint8_t by = address_space.read(ad);
+	A = by;
+}
+
+void CPU::ldhn8a(uint8_t val){
+	uint16_t ad = 0xFF00 + val;
+	address_space.write(ad, A);
 }

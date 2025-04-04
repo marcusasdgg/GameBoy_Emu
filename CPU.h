@@ -4,6 +4,7 @@
 #include<cstdint>
 #include<vector>
 #include "AddressSpace.h"
+#include "Clock.h"
 typedef unsigned char byte;
 typedef uint16_t address;
 
@@ -23,6 +24,8 @@ static const registerCalls val_to_r16stk[] = { BC,DE,HL,AF };
 static const registerCalls val_to_r16mem[] = { BC,DE,HLI, HLD };
 static const Cond val_to_cond[] = { nz,z,nc,c };
 
+//worry about cpu registers and jumps, maybe make it so that the block handles calculate the neccesary jump of bytes
+//cpu should be running in a separate thread-loop
 class CPU{
 	private:
 // registers
@@ -35,6 +38,9 @@ class CPU{
 		byte E;
 		byte H;
 		byte L;
+
+		//
+		bool IME;
 		
 		//flag register
 		byte F;
@@ -46,6 +52,9 @@ class CPU{
 		uint16_t PC;
 
 		AddressSpace& address_space;
+
+		Clock& clock;
+
 
 // interrupt_check
 		bool interrupt_received();
@@ -103,6 +112,8 @@ class CPU{
 		void ldn16sp(uint16_t);
 		void ldhlspe8(int16_t e8);
 		void ldsphl();
+		void ldhan8(uint8_t val);
+		void ldhn8a(uint8_t val);
 
 
 		// arithmetic operations
@@ -137,6 +148,12 @@ class CPU{
 		void dechl();
 		void decr16(registerCalls);
 		void decsp();
+
+		// compare functions
+		void cpar8(registerCalls a);
+		void cpahl();
+		void cpan8(uint8_t val);
+		void cpl();
 
 		//bitwise logic
 		void andar8(registerCalls);
@@ -180,17 +197,19 @@ class CPU{
 		void swaphl();
 
 		//jump and subroutine
-		void calln16();
-		void callccn16();
+		void calln16(uint16_t val);
+		void callccn16(Cond c, uint16_t val);
 		void jphl();
-		void jpn16();
-		void jpccn16();
-		void jrn16();
-		void jrccn16();
-		void retcc();
+		void jpn16(uint16_t val);
+		void jpccn16(Cond c, uint16_t val);
+		void jre8(uint8_t);
+		void jrcce8(Cond c, uint8_t val);
+		void retcc(Cond c);
 		void ret();
 		void reti();
-		void rstvec();
+
+		// if rst vector i.e 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, and 0x38 jump
+		void rstvec(uint8_t val);
 
 		//carry flag instructions
 		void ccf();
@@ -198,9 +217,12 @@ class CPU{
 
 		//stack manipulation instructions
 		void popaf();
-		void popr16();
+		void popr16(registerCalls a);
+		uint16_t popn16();
 		void pushaf();
-		void pushr16();
+		void pushn8(uint8_t val);
+		void pushn16(uint16_t val);
+		void pushr16(registerCalls a);
 
 		//interrupts
 		void di();
@@ -220,25 +242,34 @@ class CPU{
 		uint16_t handle_block_2(uint16_t program_counter);
 		uint16_t handle_block_3(uint16_t program_counter);
 
-		//decodes the instruction
+		//decodes the instruction and executes it fetch can be in there somewhere maybe in execute loop
 		uint16_t decode_execute_instruction(uint16_t program_counter);
 
 		//given ranges starting from bit start to end inclusive get the number start is the right most least significant left is most signficiant.
 		uint8_t get_bit_range(uint8_t value, uint8_t start, uint8_t end);
 
+		//given a cond return if the cond applies 
+		bool check_cond(Cond c);
+
+		void block_cycle_n(uint8_t n);
+
+		// block until the cycle changes.
+		void block_cycle_i();
+
 	public:
 
-		CPU(AddressSpace& addressSpace);
+		CPU(AddressSpace& addressSpace, Clock& clock);
 
 		void inititialise();
 
 		void execute(uint16_t start_ptr = 0);
 
-		
+		void stop();
 		// aint gonna work with jumps
 		void execute_single(std::vector<byte>);
 
 		void arithmetic_test();
-
+		CPU(const CPU&) = delete;
+		CPU& operator=(const CPU&) = delete;
 };
 

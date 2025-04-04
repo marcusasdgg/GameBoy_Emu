@@ -252,3 +252,42 @@ void CPU::decr16(registerCalls a) {
 void CPU::decsp() {
 	SP -= 1;
 }
+
+
+void CPU::cpan8(uint8_t val){
+	if (half_borrow(A, val)) {
+		set_half_carry(true);
+	}
+	uint8_t final = A - val;
+	if (final == 0) set_zero(true);
+	set_n(true);
+	if (val > A) set_carry(true);
+}
+
+void CPU::cpl() {
+	set_n(true);
+	set_half_carry(true);
+	A = ~ A;
+}
+
+void CPU::cpar8(registerCalls a) {
+	uint8_t val = retrieve_register_8(a);
+	if (half_borrow(A, val)) {
+		set_half_carry(true);
+	}
+	uint8_t final = A - val;
+	if (final == 0) set_zero(true);
+	set_n(true);
+	if (val > A) set_carry(true);
+}
+
+void CPU::cpahl() {
+	uint8_t val = address_space.read(retrieve_register_16(HL));
+	if (half_borrow(A, val)) {
+		set_half_carry(true);
+	}
+	uint8_t final = A - val;
+	if (final == 0) set_zero(true);
+	set_n(true);
+	if (val > A) set_carry(true);
+}

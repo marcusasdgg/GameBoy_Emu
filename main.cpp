@@ -1,8 +1,16 @@
 #include "CPU.h"
+#include "Clock.h"
+#include "AddressSpace.h"
+
+AddressSpace addr;
+Clock ck(1.0);
+
 
 int main() {
-	AddressSpace adr = AddressSpace();
-	CPU cpu = CPU(adr);
+	CPU cpu(addr, ck);
+	ck.start_clock();
 	cpu.inititialise();
+
 	cpu.arithmetic_test();
+	while (true);
 }

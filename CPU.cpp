@@ -1,4 +1,5 @@
 #include "CPU.h"
+#include "Clock.h"
 #include <iostream>
 
 //every function is required to check for interrupts before then after.
@@ -21,9 +22,24 @@ static void print_binary(uint8_t n) {
 	putchar('\n');
 }
 
-CPU::CPU(AddressSpace& addressSpace) : address_space(addressSpace) {
+CPU::CPU(AddressSpace& addressSpace, Clock& clock_l) : address_space(addressSpace), clock(clock_l) {
 
+	A = 0;
+	B = 0;
+	C = 0;
+	D = 0;
+	E = 0;
+	F = 0;
+	H = 0;
+	L = 0;
+
+
+	F = 0;
+	SP = 0;
+	PC = 0;
+	IME = 0;
 }
+
 
 void CPU::inititialise() {
 	A = 0;
@@ -34,11 +50,18 @@ void CPU::inititialise() {
 	F = 0;
 	H = 0;
 	L = 0;
+	IME = 0;
 
 	F = 0;
 	SP = 0xFFFE;
 	PC = 0;
 
+}
+
+void CPU::execute(uint16_t start_ptr){
+	while (true) {
+		PC = decode_execute_instruction(PC);
+	}
 }
 
 static bool is_16_bit(registerCalls a) {
@@ -209,13 +232,16 @@ uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t block = opcode >> 6;
 	switch (block) {
 		case 0:
-			break;
+			return handle_block_0(program_counter);
 		case 1:
-			break;
+			return handle_block_1(program_counter);
 		case 2:
-			break;
+			return handle_block_2(program_counter);
 		case 3:
-			break;
+			return handle_block_3(program_counter);
+		default:
+			//restart the gb
+			return -1;
 	}
 	return 0;
 }
@@ -224,6 +250,37 @@ uint8_t CPU::get_bit_range(uint8_t value, uint8_t start, uint8_t end){
 	uint8_t n = end - start + 1;
 	uint8_t bitmask = (1 << n) - 1;
 	return (value >> start) & bitmask;
+}
+
+bool CPU::check_cond(Cond c){
+	switch (c){
+	case nz:
+		return !get_zero();
+	case z:
+		return get_zero();
+	case nc:
+		return !get_carry();
+	case Cond::c:
+		return get_carry();
+	default:
+		printf("what");
+		return false;
+		break;
+	}
+}
+
+void CPU::block_cycle_n(uint8_t n) {
+	for (int i = 0; i < n; i++) {
+		block_cycle_i();
+	}
+}
+
+void CPU::block_cycle_i(){
+	uint64_t cycle_count = clock.get_cycle();
+
+	while (cycle_count == clock.get_cycle()) {
+		std::this_thread::sleep_for(std::chrono::nanoseconds(30));
+	}
 }
 
 
@@ -316,10 +373,14 @@ bool CPU::get_n(){
 }
 
 
- 
+void CPU::ccf() {
+	set_n(false);
+	set_half_carry(false);
+	set_carry(!get_carry());
+}
 
-
-
-
-
-
+void CPU::scf(){
+	set_carry(true);
+	set_half_carry(false);
+	set_n(false);
+}

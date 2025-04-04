@@ -128,6 +128,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AddressSpace.h" />
+    <ClInclude Include="Clock.h" />
     <ClInclude Include="CPU.h" />
   </ItemGroup>
   <ItemGroup>
@@ -136,11 +137,18 @@
     <ClCompile Include="bitflag.cpp" />
     <ClCompile Include="bitshift.cpp" />
     <ClCompile Include="bitwise_logic.cpp" />
-    <ClCompile Include="block_reading.cpp" />
+    <ClCompile Include="block_0.cpp" />
+    <ClCompile Include="block_1.cpp" />
+    <ClCompile Include="block_2.cpp" />
+    <ClCompile Include="block_3.cpp" />
+    <ClCompile Include="Clock.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="interrupts.cpp" />
     <ClCompile Include="jump_subroutine.cpp" />
     <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="miscl.cpp" />
+    <ClCompile Include="stack.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
