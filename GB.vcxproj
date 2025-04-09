@@ -130,6 +130,7 @@
     <ClInclude Include="AddressSpace.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="PPU.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
@@ -148,6 +149,7 @@
     <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="miscl.cpp" />
+    <ClCompile Include="PPU.cpp" />
     <ClCompile Include="stack.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

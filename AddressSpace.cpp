@@ -1,8 +1,8 @@
 #include "AddressSpace.h"
 #include <algorithm>
-#include <string>
 #include <fstream>
 #include <vector>
+
 
 
 AddressSpace::AddressSpace() {
@@ -21,12 +21,19 @@ void AddressSpace::readRom(std::string file_path) {
     std::ifstream inputFile(file_path, std::ios::binary);
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
         std::istreambuf_iterator<char>());
-    if (buffer.size() > 64000) {
+    if (buffer.size() > SIZE) {
         printf("too big");
         return;
     }
     std::copy(buffer.begin(), buffer.end(), memory);
     inputFile.close();
+}
+
+void AddressSpace::saveRom(std::string file_path) {
+    std::ofstream outputFile(file_path, std::ios::binary);
+    outputFile.write(reinterpret_cast<const char*>(memory), SIZE);
+    printf("saving");
+    outputFile.close();
 }
 
 void AddressSpace::write(uint16_t address, uint8_t value) {

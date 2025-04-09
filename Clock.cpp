@@ -3,6 +3,7 @@
 #include <chrono>
 #include<iostream>
 void Clock::tick(){
+    //rintf("t5icvk\n");
     cycles.fetch_add(1, std::memory_order_relaxed);
 }
 

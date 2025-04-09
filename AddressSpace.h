@@ -1,15 +1,33 @@
 #pragma once
 #include <cstdint>
+#include<string>
 
 const int SIZE = 0x10000;
 class AddressSpace{
 public:
 	uint8_t read(uint16_t address);
+	//rename to address space...
 	void readRom(std::string file_path);
+	void saveRom(std::string file_path);
 	void write(uint16_t address, uint8_t value);
 	AddressSpace();
 
 private:
 	uint8_t memory[SIZE];
+	bool cpuWriteable = false;
+
 };
+
+
+//0000 - 3FFF for rom bank 0
+// 4000 - 7FFF for rom bank 1 - NN
+// 8000 - 9FFF for video ram
+// A000 - bFFF for external ram
+// C000 - CFFF wram
+// D000 - DFFF for wram 
+// E000 - FDFF echoram
+// Fe00 - Fe9F OAM
+// FEA0 FEFF not usable
+//FF00 FF7F high ram
+// FFFF FFFF IE enable register
 

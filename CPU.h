@@ -243,7 +243,7 @@ class CPU{
 		void nop();
 		void stop();
 
-		void print_registers();
+		
 
 		uint16_t handle_block_0(uint16_t program_counter);
 		uint16_t handle_block_1(uint16_t program_counter);
@@ -264,14 +264,20 @@ class CPU{
 		// block until the cycle changes.
 		void block_cycle_i();
 
+		bool get_bit(uint8_t byte, uint8_t bit);
+
+		bool isRunning = true;
+		void execute_loop(uint16_t start_ptr);
+		std::thread cpu_thread;
 	public:
 
 		CPU(AddressSpace& addressSpace, Clock& clock);
 
 		void inititialise();
+		void print_registers();
 
 		void execute(uint16_t start_ptr = 0);
-
+		void stop_execute();
 		// aint gonna work with jumps
 		void execute_single(std::vector<byte>);
 

@@ -58,14 +58,54 @@ void CPU::inititialise() {
 
 }
 
-void CPU::execute(uint16_t start_ptr){
-	while (true) {
-		PC = decode_execute_instruction(PC);
+//do in its own thread whoopsies
+void CPU::execute_loop(uint16_t start_ptr){
+	while (isRunning) {
+		try
+		{
+			PC = decode_execute_instruction(PC);
+		}
+		catch (const std::exception& e)
+		{
+			std::cout << e.what();
+		}
+		catch (...) {
+			std::cout << "Unknown exception in CPU thread" << std::endl;
+		}
+	}
+}
+void CPU::execute(uint16_t start_ptr) {
+	isRunning = true;
+	/*cpu_thread = std::thread([this, start_ptr]() { execute_loop(start_ptr); });*/
+	cpu_thread = std::thread([this, start_ptr]() {
+		//printf("executing thread loop");
+			execute_loop(start_ptr);
+		});
+}
+
+void CPU::stop_execute(){
+	printf("stopping cpu\n");
+	isRunning = false;
+	if (cpu_thread.joinable()) {
+		try
+		{
+			cpu_thread.join();
+		}
+		catch (const std::exception& e)
+		{
+			std::cout << "execption occured" << e.what();
+		}
+		catch (...) {
+			std::cout << "Unknown exception in CPU thread" << std::endl;
+		}
+	}
+	else {
+		printf("threa is not joinable");
 	}
 }
 
 static bool is_16_bit(registerCalls a) {
-	return (a == registerCalls::BC || a == registerCalls::DE || a == registerCalls::HL || a == registerCalls::AF);
+	return (a == registerCalls::BC || a == registerCalls::DE || a == registerCalls::HL || a == registerCalls::AF || a == registerCalls::SP || a == registerCalls::PC);
 }
 
 void CPU::store_in_register(registerCalls a, uint16_t value) {
@@ -229,15 +269,20 @@ void CPU::print_registers() {
 
 uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t opcode = address_space.read(program_counter);
+	printf("opcode is "); print_binary(opcode);
 	uint8_t block = opcode >> 6;
 	switch (block) {
 		case 0:
+			printf("block 0\n\n");
 			return handle_block_0(program_counter);
 		case 1:
+			printf("block 1\n\n");
 			return handle_block_1(program_counter);
 		case 2:
+			printf("block 2\n\n");
 			return handle_block_2(program_counter);
 		case 3:
+			printf("block 3\n\n");
 			return handle_block_3(program_counter);
 		default:
 			//restart the gb
@@ -281,6 +326,10 @@ void CPU::block_cycle_i(){
 	while (cycle_count == clock.get_cycle()) {
 		std::this_thread::sleep_for(std::chrono::nanoseconds(30));
 	}
+}
+
+bool CPU::get_bit(uint8_t byte, uint8_t bit) {
+	return (byte & (1 << bit)) >> bit;
 }
 
 
