@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -130,7 +130,11 @@
     <ClInclude Include="AddressSpace.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="FIFO.h" />
+    <ClInclude Include="helpers.h" />
+    <ClInclude Include="Pixel.h" />
     <ClInclude Include="PPU.h" />
+    <ClInclude Include="Sprite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
@@ -144,12 +148,15 @@
     <ClCompile Include="block_3.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="FIFO.cpp" />
+    <ClCompile Include="helpers.cpp" />
     <ClCompile Include="interrupts.cpp" />
     <ClCompile Include="jump_subroutine.cpp" />
     <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="miscl.cpp" />
     <ClCompile Include="PPU.cpp" />
+    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stack.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

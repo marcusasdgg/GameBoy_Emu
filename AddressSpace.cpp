@@ -9,6 +9,23 @@ AddressSpace::AddressSpace() {
 	std::fill(memory, memory + SIZE, 0);
 }
 
+std::array<uint8_t,160> AddressSpace::getOAM(){
+    std::array<uint8_t, 160> spriteData;
+    std::copy(memory + 0xFE00, memory + 0xFE9F + 1, spriteData.begin());
+    return spriteData;
+}
+
+std::array<uint8_t, 6144> AddressSpace::getVRAM()
+{
+    std::array<uint8_t, 160> vram;
+    std::copy(memory + 0x8000, memory + 0x97FF + 1, vram.begin());
+    return std::array<uint8_t, 6144>();
+}
+
+void AddressSpace::incr(uint16_t add){
+    memory[add] += 1;
+}
+
 uint8_t AddressSpace::read(uint16_t address) {
     // You can add special handling for different memory regions here
     if (address >= 0xFF00 && address <= 0xFF7F) {

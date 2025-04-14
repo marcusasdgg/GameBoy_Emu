@@ -321,10 +321,10 @@ void CPU::block_cycle_n(uint8_t n) {
 }
 
 void CPU::block_cycle_i(){
-	uint64_t cycle_count = clock.get_cycle();
+	uint64_t cycle_count = clock.get_cycle() /4 ;
 
-	while (cycle_count == clock.get_cycle()) {
-		std::this_thread::sleep_for(std::chrono::nanoseconds(30));
+	while (cycle_count == clock.get_cycle() / 4) {
+		std::this_thread::yield();
 	}
 }
 
