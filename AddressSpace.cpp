@@ -5,9 +5,22 @@
 
 
 
-AddressSpace::AddressSpace() {
+
+
+AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
 	std::fill(memory, memory + SIZE, 0);
+    std::ifstream inputFile(bootPath, std::ios::binary);
+    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+        std::istreambuf_iterator<char>());
+    std::copy(buffer.begin(), buffer.end(), bootupRom.begin());
+
+    loadRom(romPath);
 }
+
+void AddressSpace::setCpuWriteable(bool cond){
+    cpuWriteable = cond;
+}
+
 
 std::array<uint8_t,160> AddressSpace::getOAM(){
     std::array<uint8_t, 160> spriteData;
@@ -27,12 +40,30 @@ void AddressSpace::incr(uint16_t add){
 }
 
 uint8_t AddressSpace::read(uint16_t address) {
-    // You can add special handling for different memory regions here
+    if (inStartup && address < 256) {
+        return bootupRom[address];
+    }
+
     if (address >= 0xFF00 && address <= 0xFF7F) {
         // Handle I/O access
     }
+
     return memory[address];
 }
+
+void AddressSpace::loadRom(std::string file_path){
+    std::ifstream inputFile(file_path, std::ios::binary);
+    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+        std::istreambuf_iterator<char>());
+    if (buffer.size() > SIZE) {
+        printf("too big");
+        return;
+    }
+    std::copy(buffer.begin(), buffer.end(), memory);
+    inputFile.close();
+}
+
+
 
 void AddressSpace::readRom(std::string file_path) {
     std::ifstream inputFile(file_path, std::ios::binary);
@@ -54,5 +85,8 @@ void AddressSpace::saveRom(std::string file_path) {
 }
 
 void AddressSpace::write(uint16_t address, uint8_t value) {
+    if (address == 0xFF50 && value != 0) {
+        inStartup = false;
+    }
     memory[address] = value;
 }

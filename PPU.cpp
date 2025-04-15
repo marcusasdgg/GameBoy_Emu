@@ -19,21 +19,32 @@ void PPU::OAMScan(){
 	}
 }
 
-void PPU::Drawing(){
-	//pixel fetcher to give ot fifo.
-}
 
 void PPU::writeStat() {
-	uint8_t stat = addr.read(0xFF41);
+	uint8_t stat = addr.read(STAT);
 	stat &= 0b11111000;
 	stat |= (state & 0b11);              
 	stat |= ((COINCIDENCE & 0x01) << 2); 
-	addr.write(0xFF41, stat);
+	addr.write(STAT, stat);
+}
+
+void PPU::readStat(){
+	uint8_t stat = addr.read(STAT) >> 3;
+	MODE0ENABLE = stat & 1;
+	MODE1ENABLE = stat & (1 < 1);
+	MODE2ENABLE = stat & (1 < 2);
+	LYCLYENABLE = stat & (1 < 3);
+}
+
+void PPU::updateMode() {
+	uint8_t stat = (addr.read(STAT) >> 2) << 2;
+	stat |= state;
+	addr.write(STAT, stat);
 }
 
 void PPU::setLYCFlag() {
 	uint8_t scanline = get_scanline();
-	uint8_t lyc = addr.read(0xFF45);
+	uint8_t lyc = addr.read(LYC);
 
 	if (COINCIDENCE && lyc != scanline) {
 		COINCIDENCE = false;
@@ -47,46 +58,73 @@ void PPU::setLYCFlag() {
 }
 
 void PPU::execute_loop(){
-	while (true) {
+	while (action) {
 		int cycleCount = clock.get_cycle();
 		for (int i = 0; i < 144; i++) {
 			//oam scan
-			state = PPUSTATE::OAM; block_n_cycles(80);
+			readStat();
+			addr.setCpuWriteable(false);
+			state = PPUSTATE::OAM; 
+			if (MODE2ENABLE) 
+				set_stat_interrupt();
+
+			block_n_cycles(80);
+
 			//drawing
-			state = PPUSTATE::DRAW; renderScanline();
+			readStat();
+			state = PPUSTATE::DRAW; renderScanline(i);
 			block_n_cycles(172);
-			addr.incr(0xFF44);
+
+			//hblank
+			readStat();
 			setLYCFlag();
-			state = PPUSTATE::HBLANK; block_n_cycles(204);
+			addr.setCpuWriteable(true);
+			addr.incr(LY);
+			state = PPUSTATE::HBLANK; 
+			if (MODE0ENABLE)
+				set_stat_interrupt();
+			block_n_cycles(204);
 		}
-		state = PPUSTATE::VLANK; block_n_cycles(70224 - (clock.get_cycle() - cycleCount));
+		//vblank
+		readStat();
+		state = PPUSTATE::VLANK; 
+		if (MODE1ENABLE)
+			set_stat_interrupt();
+		set_vblank_interrupt();
+		addr.write(LY, 0);
+		block_n_cycles(70224 - (clock.get_cycle() - cycleCount));
 	}
 }
 
-uint8_t PPU::get_scx()
-{
-	return addr.read(0xFF43);
+uint8_t PPU::get_scx(){
+	return addr.read(SCX);
 }
 
-uint8_t PPU::get_scy()
-{
-	return addr.read(0xFF42);
+uint8_t PPU::get_scy(){
+	return addr.read(SCY);
 }
 
 void PPU::set_vblank_interrupt(){
+	uint8_t val = addr.read(IF);
+	addr.write(IF, val | 1);
+}
 
+
+void PPU::set_stat_interrupt(){
+	uint8_t val = addr.read(IF);
+	addr.write(IF, (val << 1) | 1);
 }
 
 void PPU::block_n_cycles(int num){
-	for (int i = 0; i < num; i++) {
+	for (int i = 0; i < num * 2; i++) {
 		block_cycles_i();
 	}
 }
 
 void PPU::block_cycles_i(){
-	uint64_t cycle_count = clock.get_cycle() / 2;
+	uint64_t cycle_count = clock.get_cycle();
 
-	while (cycle_count == clock.get_cycle() / 2) {
+	while (cycle_count == clock.get_cycle()) {
 		std::this_thread::yield();
 	}
 }
@@ -95,10 +133,12 @@ void PPU::fetch_vram(){
 	vram_buffer = addr.getVRAM();
 }
 
-void PPU::renderScanline(){
+void PPU::renderScanline(uint8_t scanlineno) {
 	renderBackground();
 	renderWindow();
 	renderSprite();
+
+	std::copy(scanline_buffer.begin(), scanline_buffer.end(), framebuffer[scanlineno].begin());
 }
 
 void PPU::renderBackground(){
@@ -130,7 +170,7 @@ void PPU::renderBackground(){
 
 		int bitIndex = 7 - (bgX % 8);
 		int colorBit = ((tileHigh >> bitIndex) & 0b1) << 1 | ((tileLow >> bitIndex) & 0b1);
-		uint8_t bgp = addr.read(0xFF47);
+		uint8_t bgp = addr.read(BGP);
 
 		int paletteShift = colorBit * 2;
 		int paletteColor = (bgp >> paletteShift) & 0b11;
@@ -162,8 +202,8 @@ void PPU::renderWindow(){
 	}
 
 	int currentScanline = get_scanline();
-	int windowX = addr.read(0xFF4B) - 7;
-	int windowY = addr.read(0xFF4A);
+	int windowX = addr.read(WX) - 7;
+	int windowY = addr.read(WY);
 
 	if (currentScanline < windowY) return;
 
@@ -207,7 +247,7 @@ void PPU::renderWindow(){
 		int bitIndex = 7 - (windowColumn % 8);
 		int colorBit = ((tileHigh >> bitIndex) & 1) << 1 | ((tileLow >> bitIndex) & 1);
 
-		uint8_t bgp = addr.read(0xFF47);
+		uint8_t bgp = addr.read(BGP);
 		int paletteShift = colorBit * 2;
 		int paletteColor = (bgp >> paletteShift) & 0b11;
 
@@ -291,7 +331,7 @@ void PPU::renderSprite(){
 				pixelOwner[screenX] = xPos;
 				bool isSpritePalette1 = (attributes & (1 << 4)) != 0;
 
-				uint8_t spritePalette = isSpritePalette1 ? addr.read(0xFF48) : addr.read(0xFF49);
+				uint8_t spritePalette = isSpritePalette1 ? addr.read(OBP0) : addr.read(OBP1);
 				int paletteShift = colorBit * 2;
 				int paletteColor = (spritePalette >> paletteShift) & 0b11;
 
@@ -321,7 +361,7 @@ void PPU::renderSprite(){
 
 uint8_t PPU::get_scanline()
 {
-	return addr.read(0xFF44);
+	return addr.read(LY);
 }
 
 
@@ -342,7 +382,7 @@ std::array<uint8_t, 16> PPU::get_tile(int index, bool indexingMethod) {
 	return tile;
 }
 
-PPU::PPU(AddressSpace& addressSpace, Clock& clock_l, Fifo& fifo_l) : addr(addressSpace), clock(clock_l), fifo(fifo_l) {
+PPU::PPU(AddressSpace& addressSpace, Clock& clock_l) : addr(addressSpace), clock(clock_l) {
 	LCDENABLE = false;
 	WINMAPSEL = false;
 	WINENABLE = false;
@@ -362,6 +402,30 @@ PPU::PPU(AddressSpace& addressSpace, Clock& clock_l, Fifo& fifo_l) : addr(addres
 	BACKFIFO = 0;
 	SPRITEFIFO = 0;
 }
+
+void PPU::execute(){
+	ppu_thread = std::thread([this] {
+		//printf("executing thread loop");
+		execute_loop();
+	});
+}
+
+void PPU::stop(){
+	printf("stopping ppu\n");
+	action = false;
+	if (ppu_thread.joinable()) {
+		ppu_thread.join();
+	}
+	else {
+		printf("not joinable wtf\n");
+	}
+}
+
+std::array<std::array<PIXEL, 160>, 144> PPU::getDisplay()
+{
+	return framebuffer;
+}
+
 
 
 

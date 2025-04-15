@@ -3,6 +3,7 @@
 #include <thread>
 #include <chrono>
 #include <atomic>
+#include "AddressSpace.h"
 class Clock{
 private:
 	// number of cycles
@@ -10,6 +11,8 @@ private:
 	bool active;
 	std::chrono::nanoseconds time_per_cycle;
 	std::thread clock_thread;
+
+	AddressSpace& addr;
 
 	// increment the cycle count
 	void tick();
@@ -19,7 +22,7 @@ private:
 public:
 	Clock(const Clock&) = delete;
 	Clock& operator=(const Clock&) = delete;
-	Clock(double hz);
+	Clock(double hz, AddressSpace& a);
 	void start_clock();
 
 	void stop_clock();

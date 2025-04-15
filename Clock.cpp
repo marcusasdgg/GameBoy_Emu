@@ -3,11 +3,11 @@
 #include <chrono>
 #include<iostream>
 void Clock::tick(){
-    //rintf("t5icvk\n");
     cycles.fetch_add(1, std::memory_order_relaxed);
+    addr.incr(0xFF41);
 }
 
-Clock::Clock(double hz) {
+Clock::Clock(double hz, AddressSpace& a) : addr(a) {
     // Calculate time per cycle in nanoseconds (avoiding floating-point precision issues)
     active = true;
     cycles = 0;
@@ -20,7 +20,13 @@ void Clock::start_clock(){
 
 void Clock::stop_clock(){
     active = false;
-    clock_thread.join();
+    if (clock_thread.joinable()){
+        clock_thread.join();
+    }
+    else {
+        printf("clock thread not joimnable()???\n");
+    }
+
 }
 
 void Clock::clock_loop() {

@@ -60,6 +60,7 @@ void CPU::inititialise() {
 
 //do in its own thread whoopsies
 void CPU::execute_loop(uint16_t start_ptr){
+	//before hand run the bootup code.
 	while (isRunning) {
 		try
 		{
@@ -315,7 +316,7 @@ bool CPU::check_cond(Cond c){
 }
 
 void CPU::block_cycle_n(uint8_t n) {
-	for (int i = 0; i < n; i++) {
+	for (int i = 0; i < n*4; i++) {
 		block_cycle_i();
 	}
 }

@@ -34,7 +34,6 @@ class PPU {
 		//reference to shared objects
 		Clock& clock;
 		AddressSpace& addr;
-		Fifo& fifo;
 
 		int windowLineCounter = 0;
 
@@ -48,6 +47,7 @@ class PPU {
 
 		std::array<PIXEL, 160> scanline_buffer;
 
+		std::array<std::array<PIXEL, 160>, 144> framebuffer;
 		//registers
 		//LCDC register - a mirror of the address map
 		bool LCDENABLE;
@@ -82,6 +82,10 @@ class PPU {
 
 		void writeStat();
 
+		void readStat();
+
+		void updateMode();
+
 		void setLYCFlag();
 
 		//execution_loop
@@ -102,7 +106,7 @@ class PPU {
 
 		void fetch_vram();
 
-		void renderScanline();
+		void renderScanline(uint8_t line);
 
 		void renderBackground();
 		
@@ -118,12 +122,14 @@ class PPU {
 		uint8_t BACKFIFO;
 		uint8_t SPRITEFIFO;
 
+		bool action = true;
 
 
-
-
+		std::thread ppu_thread;
 	public:
-		PPU(AddressSpace& addressSpace, Clock& clock_l, Fifo& fifo_l);
+		PPU(AddressSpace& addressSpace, Clock& clock_l);
 		void execute();
+		void stop();
+		std::array<std::array<PIXEL,160>,144> getDisplay();
 };
 
