@@ -6,7 +6,7 @@
 #include <iostream>
 
 AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
-Clock ck(100,addr);
+Clock ck(4000000000,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;
@@ -39,7 +39,7 @@ int main() {
 	//	std::this_thread::sleep_for(std::chrono::milliseconds(16));
 	//}
 
-	std::this_thread::sleep_for(std::chrono::seconds(5));
+	std::this_thread::sleep_for(std::chrono::seconds(10));
 	cpu.stop_execute();
 	cpu.print_registers();
 	ppu.stop();

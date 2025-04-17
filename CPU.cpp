@@ -274,33 +274,17 @@ void CPU::print_registers() {
 
 uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t opcode = address_space.read(program_counter);
-	printf("opcode is "); print_binary(opcode);
-	uint8_t block = opcode >> 6;
-	switch (block) {
-		case 0:
-			if (debug)
-				printf("block 0\n");
-			return handle_block_0(program_counter);
-		case 1:
-			if (debug)
-				printf("block 1 \n");
-			return handle_block_1(program_counter);
-		case 2:
-			if (debug)
-				printf("block 2 \n");
-			return handle_block_2(program_counter);
-		case 3:
-			if (debug)
-				printf("block 3 \n");
-			return handle_block_3(program_counter);
-		default:
-			if (debug)
-				printf("invalid op code\n");
-			//restart the gb
-			return -1;
+	//if (debug) {
+	//	printf("opcode is : 0x");
+	//	std::cout << std::hex << static_cast<int>(opcode) << std::endl;
+	//}
+		
+	if (opcode == 0xCB) {
+		return prefixedCodes(program_counter + 1);
 	}
-	if (debug)
-		printf("\n");
+	else {
+		return unprefixedCodes(program_counter);
+	}
 	return 0;
 }
 
@@ -334,9 +318,9 @@ void CPU::block_cycle_n(uint8_t n) {
 }
 
 void CPU::block_cycle_i(){
-	uint64_t cycle_count = clock.get_cycle() /4 ;
+	uint64_t cycle_count = clock.get_cycle();
 
-	while (cycle_count == clock.get_cycle() / 4) {
+	while (cycle_count == clock.get_cycle()) {
 		std::this_thread::yield();
 	}
 }

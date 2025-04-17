@@ -6,1004 +6,1308 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	uint8_t cycles = 0;
 
 	switch (code) {
-	case 0x00:
+	case 0x00 : {
 		nop();
 		cycles = 4;
 		break;
-	case 0x01:
+	}
+	case 0x01 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2,byte1);
 		ldr16n16(registerCalls::BC, n16);
 		cycles = 12;
 		break;
-	case 0x02:
+	}
+	case 0x02 : {
 		ldr16a(registerCalls::BC);
 		cycles = 8;
 		break;
-	case 0x03:
+	}
+	case 0x03 : {
 		incr16(registerCalls::BC);
 		cycles = 8;
 		break;
-	case 0x04:
+	}
+	case 0x04 : {
 		incr8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x05:
+	}
+	case 0x05 : {
 		decr8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x06:
+	}
+	case 0x06 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		ldr8n8(registerCalls::B, byte1);
 		cycles = 8;
 		break;
-	case 0x07:
+	}
+	case 0x07 : {
 		rlca();
 		cycles = 4;
 		break;
-	case 0x08:
+	}
+	case 0x08 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
 		ldn16sp(n16);
 		cycles = 20;
 		break;
-	case 0x09:
+	}
+	case 0x09 : {
 		addhlr16(registerCalls::BC);
 		cycles = 8;
 		break;
-	case 0x0A:
+	}
+	case 0x0A : {
 		ldar16(registerCalls::BC);
 		cycles = 8;
 		break;
-	case 0x0B:
+	}
+	case 0x0B : {
 		decr16(registerCalls::BC);
 		cycles = 8;
 		break;
-	case 0x0C:
+	}
+	case 0x0C : {
 		incr8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x0D:
+	}
+	case 0x0D : {
 		decr8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x0E:
+	}
+	case 0x0E : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		ldr8n8(registerCalls::C, byte1);
 		cycles = 8;
 		break;
-	case 0x0F:
+	}
+	case 0x0F : {
 		rrca();
 		cycles = 4;
 		break;
-	case 0x10:
+	}
+	case 0x10 : {
 		//supposed to take n8???
 		stop();
 		cycles = 4;
 		break;
-	case 0x11:
+	}
+	case 0x11 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
 		ldr16n16(registerCalls::DE, n16);
 		cycles = 12;
 		break;
-	case 0x12:
+	}
+	case 0x12 : {
 		ldr16a(registerCalls::DE);
 		cycles = 8;
 		break;
-	case 0x13:
+	}
+	case 0x13 : {
 		incr16(registerCalls::DE);
 		cycles = 8;
 		break;
-	case 0x14:
+	}
+	case 0x14 : {
 		incr8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x15:
+	}
+	case 0x15 : {
 		decr8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x16:
+	}
+	case 0x16 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		ldr8n8(registerCalls::D,byte1);
 		cycles = 8;
 		break;
-	case 0x17:
+	}
+	case 0x17 : {
 		rla();
 		cycles = 4;
 		break;
-	case 0x18:
+	}
+	case 0x18 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		jre8(byte1);
 		cycles = 12;
 		break;
-	case 0x19:
+	}
+	case 0x19 : {
 		addhlr16(registerCalls::DE);
 		cycles = 8;
 		break;
-	case 0x1A:
+	}
+	case 0x1A : {
 		ldar16(registerCalls::DE);
 		cycles = 8;
 		break;
-	case 0x1B:
+	}
+	case 0x1B : {
 		decr16(registerCalls::DE);
 		cycles = 8;
 		break;
-	case 0x1C:
+	}
+	case 0x1C : {
 		incr8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x1D:
+	}
+	case 0x1D : {
 		decr8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x1E:
+	}
+	case 0x1E : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		ldr8n8(registerCalls::E, byte1);
 		cycles = 8;
 		break;
-	case 0x1F:
+	}
+	case 0x1F : {
 		rra();
 		cycles = 4;
 		break;
-	case 0x20:
+	}
+	case 0x20 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		jrcce8(Cond::nz,byte1);
 		cycles = 12;
 		break;
-	case 0x21:
-		LDHL n16();
+	}
+	case 0x21 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		ldr16n16(registerCalls::HL, n16);
 		cycles = 12;
 		break;
-	case 0x22:
-		LDHL A();
+	}
+	case 0x22 : {
+		ldhlia();
 		cycles = 8;
 		break;
-	case 0x23:
-		INCHL();
+	}
+	case 0x23 : {
+		incr16(registerCalls::HL);
 		cycles = 8;
 		break;
-	case 0x24:
-		INCH();
+	}
+	case 0x24 : {
+		incr8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x25:
-		DECH();
+	}
+	case 0x25 : {
+		decr8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x26:
-		LDH n8();
+	}
+	case 0x26 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldr8n8(registerCalls::H, byte1);
 		cycles = 8;
 		break;
-	case 0x27:
-		DAA();
+	}
+	case 0x27 : {
+		daa();
 		cycles = 4;
 		break;
-	case 0x28:
-		JRZ e8();
+	}
+	case 0x28 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		jrcce8(Cond::z, byte1);
 		cycles = 12;
 		break;
-	case 0x29:
-		ADDHL HL();
+	}
+	case 0x29 : {
+		addhlr16(registerCalls::HL);
 		cycles = 8;
 		break;
-	case 0x2A:
-		LDA HL();
+	}
+	case 0x2A : {
+		ldahli();
 		cycles = 8;
 		break;
-	case 0x2B:
-		DECHL();
+	}
+	case 0x2B : {
+		dechl();
 		cycles = 8;
 		break;
-	case 0x2C:
-		INCL();
+	}
+	case 0x2C : {
+		incr8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x2D:
-		DECL();
+	}
+	case 0x2D : {
+		decr8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x2E:
-		LDL n8();
+	}
+	case 0x2E : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldr8n8(registerCalls::L, byte1);
 		cycles = 8;
 		break;
-	case 0x2F:
-		CPL();
+	}
+	case 0x2F : {
+		cpl();
 		cycles = 4;
 		break;
-	case 0x30:
-		JRNC e8();
+	}
+	case 0x30 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		jrcce8(Cond::nc, byte1);
 		cycles = 12;
 		break;
-	case 0x31:
-		LDSP n16();
+	}
+	case 0x31 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		ldspn16(n16);
 		cycles = 12;
 		break;
-	case 0x32:
-		LDHL A();
+	}
+	case 0x32 : {
+		ldhlda();
 		cycles = 8;
 		break;
-	case 0x33:
-		INCSP();
+	}
+	case 0x33 : {
+		incsp();
 		cycles = 8;
 		break;
-	case 0x34:
-		INCHL();
+	}
+	case 0x34 : {
+		inchl();
 		cycles = 12;
 		break;
-	case 0x35:
-		DECHL();
+	}
+	case 0x35 : {
+		dechl();
 		cycles = 12;
 		break;
-	case 0x36:
-		LDHL n8();
+	}
+	case 0x36 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldhln8(byte1);
 		cycles = 12;
 		break;
-	case 0x37:
-		SCF();
+	}
+	case 0x37 : {
+		scf();
 		cycles = 4;
 		break;
-	case 0x38:
-		JRC e8();
+	}
+	case 0x38 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		jrcce8(Cond::c, byte1);
 		cycles = 12;
 		break;
-	case 0x39:
-		ADDHL SP();
+	}
+	case 0x39 : {
+		addhlsp();
 		cycles = 8;
 		break;
-	case 0x3A:
-		LDA HL();
+	}
+	case 0x3A : {
+		ldahld();
 		cycles = 8;
 		break;
-	case 0x3B:
-		DECSP();
+	}
+	case 0x3B : {
+		decsp();
 		cycles = 8;
 		break;
-	case 0x3C:
-		INCA();
+	}
+	case 0x3C : {
+		incr8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x3D:
-		DECA();
+	}
+	case 0x3D : {
+		decr8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x3E:
-		LDA n8();
+	}
+	case 0x3E : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldr8n8(registerCalls::A, byte1);
 		cycles = 8;
 		break;
-	case 0x3F:
-		CCF();
+	}
+	case 0x3F : {
+		ccf();
 		cycles = 4;
 		break;
-	case 0x40:
-		LDB B();
+	}
+	case 0x40 : {
+		ldr8r8(registerCalls::B, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x41:
-		LDB C();
+	}
+	case 0x41 : {
+		ldr8r8(registerCalls::B, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x42:
-		LDB D();
+	}
+	case 0x42 : {
+		ldr8r8(registerCalls::B, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x43:
-		LDB E();
+	}
+	case 0x43 : {
+		ldr8r8(registerCalls::B, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x44:
-		LDB H();
+	}
+	case 0x44 : {
+		ldr8r8(registerCalls::B, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x45:
-		LDB L();
+	}
+	case 0x45 : {
+		ldr8r8(registerCalls::B, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x46:
-		LDB HL();
+	}
+	case 0x46 : {
+		ldr8hl(registerCalls::B);
 		cycles = 8;
 		break;
-	case 0x47:
-		LDB A();
+	}
+	case 0x47 : {
+		ldr8r8(registerCalls::B, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x48:
-		LDC B();
+	}
+	case 0x48 : {
+		ldr8r8(registerCalls::C, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x49:
-		LDC C();
+	}
+	case 0x49 : {
+		ldr8r8(registerCalls::C, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x4A:
-		LDC D();
+	}
+	case 0x4A : {
+		ldr8r8(registerCalls::C, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x4B:
-		LDC E();
+	}
+	case 0x4B : {
+		ldr8r8(registerCalls::C, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x4C:
-		LDC H();
+	}
+	case 0x4C : {
+		ldr8r8(registerCalls::C, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x4D:
-		LDC L();
+	}
+	case 0x4D : {
+		ldr8r8(registerCalls::C, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x4E:
-		LDC HL();
+	}
+	case 0x4E : {
+		ldr8hl(registerCalls::C);
 		cycles = 8;
 		break;
-	case 0x4F:
-		LDC A();
+	}
+	case 0x4F : {
+		ldr8r8(registerCalls::C, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x50:
-		LDD B();
+	}
+	case 0x50 : {
+		ldr8r8(registerCalls::D, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x51:
-		LDD C();
+	}
+	case 0x51 : {
+		ldr8r8(registerCalls::D, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x52:
-		LDD D();
+	}
+	case 0x52 : {
+		ldr8r8(registerCalls::D, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x53:
-		LDD E();
+	}
+	case 0x53 : {
+		ldr8r8(registerCalls::D, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x54:
-		LDD H();
+	}
+	case 0x54 : {
+		ldr8r8(registerCalls::D, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x55:
-		LDD L();
+	}
+	case 0x55 : {
+		ldr8r8(registerCalls::D, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x56:
-		LDD HL();
+	}
+	case 0x56 : {
+		ldr8hl(registerCalls::D);
 		cycles = 8;
 		break;
-	case 0x57:
-		LDD A();
+	}
+	case 0x57 : {
+		ldr8r8(registerCalls::D, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x58:
-		LDE B();
+	}
+	case 0x58 : {
+		ldr8r8(registerCalls::E, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x59:
-		LDE C();
+	}
+	case 0x59 : {
+		ldr8r8(registerCalls::E, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x5A:
-		LDE D();
+	}
+	case 0x5A : {
+		ldr8r8(registerCalls::E, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x5B:
-		LDE E();
+	}
+	case 0x5B : {
+		ldr8r8(registerCalls::E, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x5C:
-		LDE H();
+	}
+	case 0x5C : {
+		ldr8r8(registerCalls::E, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x5D:
-		LDE L();
+	}
+	case 0x5D : {
+		ldr8r8(registerCalls::E, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x5E:
-		LDE HL();
+	}
+	case 0x5E : {
+		ldr8hl(registerCalls::E);
 		cycles = 8;
 		break;
-	case 0x5F:
-		LDE A();
+	}
+	case 0x5F : {
+		ldr8r8(registerCalls::E, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x60:
-		LDH B();
+	}
+	case 0x60 : {
+		ldr8r8(registerCalls::H, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x61:
-		LDH C();
+	}
+	case 0x61 : {
+		ldr8r8(registerCalls::H, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x62:
-		LDH D();
+	}
+	case 0x62 : {
+		ldr8r8(registerCalls::H, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x63:
-		LDH E();
+	}
+	case 0x63 : {
+		ldr8r8(registerCalls::H, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x64:
-		LDH H();
+	}
+	case 0x64 : {
+		ldr8r8(registerCalls::H, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x65:
-		LDH L();
+	}
+	case 0x65 : {
+		ldr8r8(registerCalls::H, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x66:
-		LDH HL();
+	}
+	case 0x66 : {
+		ldr8hl(registerCalls::H);
 		cycles = 8;
 		break;
-	case 0x67:
-		LDH A();
+	}
+	case 0x67 : {
+		ldr8r8(registerCalls::H, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x68:
-		LDL B();
+	}
+	case 0x68 : {
+		ldr8r8(registerCalls::L, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x69:
-		LDL C();
+	}
+	case 0x69 : {
+		ldr8r8(registerCalls::L, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x6A:
-		LDL D();
+	}
+	case 0x6A : {
+		ldr8r8(registerCalls::L, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x6B:
-		LDL E();
+	}
+	case 0x6B : {
+		ldr8r8(registerCalls::L, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x6C:
-		LDL H();
+	}
+	case 0x6C : {
+		ldr8r8(registerCalls::L, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x6D:
-		LDL L();
+	}
+	case 0x6D : {
+		ldr8r8(registerCalls::L, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x6E:
-		LDL HL();
+	}
+	case 0x6E : {
+		ldr8hl(registerCalls::L);
 		cycles = 8;
 		break;
-	case 0x6F:
-		LDL A();
+	}
+	case 0x6F : {
+		ldr8r8(registerCalls::L, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x70:
-		LDHL B();
+	}
+	case 0x70 : {
+		ldhlr8(registerCalls::B);
 		cycles = 8;
 		break;
-	case 0x71:
-		LDHL C();
+	}
+	case 0x71 : {
+		ldhlr8(registerCalls::C);
 		cycles = 8;
 		break;
-	case 0x72:
-		LDHL D();
+	}
+	case 0x72 : {
+		ldhlr8(registerCalls::D);
 		cycles = 8;
 		break;
-	case 0x73:
-		LDHL E();
+	}
+	case 0x73 : {
+		ldhlr8(registerCalls::E);
 		cycles = 8;
 		break;
-	case 0x74:
-		LDHL H();
+	}
+	case 0x74 : {
+		ldhlr8(registerCalls::H);
 		cycles = 8;
 		break;
-	case 0x75:
-		LDHL L();
+	}
+	case 0x75 : {
+		ldhlr8(registerCalls::L);
 		cycles = 8;
 		break;
-	case 0x76:
-		HALT();
+	}
+	case 0x76 : {
+		halt();
 		cycles = 4;
 		break;
-	case 0x77:
-		LDHL A();
+	}
+	case 0x77 : {
+		ldhlr8(registerCalls::A);
 		cycles = 8;
 		break;
-	case 0x78:
-		LDA B();
+	}
+	case 0x78 : {
+		ldr8r8(registerCalls::A, registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x79:
-		LDA C();
+	}
+	case 0x79 : {
+		ldr8r8(registerCalls::A, registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x7A:
-		LDA D();
+	}
+	case 0x7A : {
+		ldr8r8(registerCalls::A, registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x7B:
-		LDA E();
+	}
+	case 0x7B : {
+		ldr8r8(registerCalls::A, registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x7C:
-		LDA H();
+	}
+	case 0x7C : {
+		ldr8r8(registerCalls::A, registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x7D:
-		LDA L();
+	}
+	case 0x7D : {
+		ldr8r8(registerCalls::A, registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x7E:
-		LDA HL();
+	}
+	case 0x7E : {
+		ldr8hl(registerCalls::A);
 		cycles = 8;
 		break;
-	case 0x7F:
-		LDA A();
+	}
+	case 0x7F : {
+		ldr8r8(registerCalls::A, registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x80:
-		ADDA B();
+	}
+	case 0x80 : {
+		addar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x81:
-		ADDA C();
+	}
+	case 0x81 : {
+		addar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x82:
-		ADDA D();
+	}
+	case 0x82 : {
+		addar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x83:
-		ADDA E();
+	}
+	case 0x83 : {
+		addar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x84:
-		ADDA H();
+	}
+	case 0x84 : {
+		addar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x85:
-		ADDA L();
+	}
+	case 0x85 : {
+		addar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x86:
-		ADDA HL();
+	}
+	case 0x86 : {
+		addahl();
 		cycles = 8;
 		break;
-	case 0x87:
-		ADDA A();
+	}
+	case 0x87 : {
+		addar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x88:
-		ADCA B();
+	}
+	case 0x88 : {
+		adcar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x89:
-		ADCA C();
+	}
+	case 0x89 : {
+		adcar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x8A:
-		ADCA D();
+	}
+	case 0x8A : {
+		adcar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x8B:
-		ADCA E();
+	}
+	case 0x8B : {
+		adcar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x8C:
-		ADCA H();
+	}
+	case 0x8C : {
+		adcar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x8D:
-		ADCA L();
+	}
+	case 0x8D : {
+		adcar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x8E:
-		ADCA HL();
+	}
+	case 0x8E : {
+		adcahl();
 		cycles = 8;
 		break;
-	case 0x8F:
-		ADCA A();
+	}
+	case 0x8F : {
+		adcar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x90:
-		SUBA B();
+	}
+	case 0x90 : {
+		subar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x91:
-		SUBA C();
+	}
+	case 0x91 : {
+		subar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x92:
-		SUBA D();
+	}
+	case 0x92 : {
+		subar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x93:
-		SUBA E();
+	}
+	case 0x93 : {
+		subar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x94:
-		SUBA H();
+	}
+	case 0x94 : {
+		subar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x95:
-		SUBA L();
+	}
+	case 0x95 : {
+		subar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x96:
-		SUBA HL();
+	}
+	case 0x96 : {
+		subahl();
 		cycles = 8;
 		break;
-	case 0x97:
-		SUBA A();
+	}
+	case 0x97 : {
+		subar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0x98:
-		SBCA B();
+	}
+	case 0x98 : {
+		sbcar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0x99:
-		SBCA C();
+	}
+	case 0x99 : {
+		sbcar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0x9A:
-		SBCA D();
+	}
+	case 0x9A : {
+		sbcar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0x9B:
-		SBCA E();
+	}
+	case 0x9B : {
+		sbcar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0x9C:
-		SBCA H();
+	}
+	case 0x9C : {
+		sbcar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0x9D:
-		SBCA L();
+	}
+	case 0x9D : {
+		sbcar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0x9E:
-		SBCA HL();
+	}
+	case 0x9E : {
+		sbcahl();
 		cycles = 8;
 		break;
-	case 0x9F:
-		SBCA A();
+	}
+	case 0x9F : {
+		sbcar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0xA0:
-		ANDA B();
+	}
+	case 0xA0 : {
+		andar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0xA1:
-		ANDA C();
+	}
+	case 0xA1 : {
+		andar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0xA2:
-		ANDA D();
+	}
+	case 0xA2 : {
+		andar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0xA3:
-		ANDA E();
+	}
+	case 0xA3 : {
+		andar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0xA4:
-		ANDA H();
+	}
+	case 0xA4 : {
+		andar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0xA5:
-		ANDA L();
+	}
+	case 0xA5 : {
+		andar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0xA6:
-		ANDA HL();
+	}
+	case 0xA6 : {
+		andahl();
 		cycles = 8;
 		break;
-	case 0xA7:
-		ANDA A();
+	}
+	case 0xA7 : {
+		andar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0xA8:
-		XORA B();
+	}
+	case 0xA8 : {
+		xorar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0xA9:
-		XORA C();
+	}
+	case 0xA9 : {
+		xorar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0xAA:
-		XORA D();
+	}
+	case 0xAA : {
+		xorar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0xAB:
-		XORA E();
+	}
+	case 0xAB : {
+		xorar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0xAC:
-		XORA H();
+	}
+	case 0xAC : {
+		xorar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0xAD:
-		XORA L();
+	}
+	case 0xAD : {
+		xorar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0xAE:
-		XORA HL();
+	}
+	case 0xAE : {
+		xorahl();
 		cycles = 8;
 		break;
-	case 0xAF:
-		XORA A();
+	}
+	case 0xAF : {
+		xorar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0xB0:
-		ORA B();
+	}
+	case 0xB0 : {
+		orar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0xB1:
-		ORA C();
+	}
+	case 0xB1 : {
+		orar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0xB2:
-		ORA D();
+	}
+	case 0xB2 : {
+		orar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0xB3:
-		ORA E();
+	}
+	case 0xB3 : {
+		orar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0xB4:
-		ORA H();
+	}
+	case 0xB4 : {
+		orar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0xB5:
-		ORA L();
+	}
+	case 0xB5 : {
+		orar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0xB6:
-		ORA HL();
+	}
+	case 0xB6 : {
+		orahl();
 		cycles = 8;
 		break;
-	case 0xB7:
-		ORA A();
+	}
+	case 0xB7 : {
+		orar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0xB8:
-		CPA B();
+	}
+	case 0xB8 : {
+		cpar8(registerCalls::B);
 		cycles = 4;
 		break;
-	case 0xB9:
-		CPA C();
+	}
+	case 0xB9 : {
+		cpar8(registerCalls::C);
 		cycles = 4;
 		break;
-	case 0xBA:
-		CPA D();
+	}
+	case 0xBA : {
+		cpar8(registerCalls::D);
 		cycles = 4;
 		break;
-	case 0xBB:
-		CPA E();
+	}
+	case 0xBB : {
+		cpar8(registerCalls::E);
 		cycles = 4;
 		break;
-	case 0xBC:
-		CPA H();
+	}
+	case 0xBC : {
+		cpar8(registerCalls::H);
 		cycles = 4;
 		break;
-	case 0xBD:
-		CPA L();
+	}
+	case 0xBD : {
+		cpar8(registerCalls::L);
 		cycles = 4;
 		break;
-	case 0xBE:
-		CPA HL();
+	}
+	case 0xBE : {
+		cpahl();
 		cycles = 8;
 		break;
-	case 0xBF:
-		CPA A();
+	}
+	case 0xBF : {
+		cpar8(registerCalls::A);
 		cycles = 4;
 		break;
-	case 0xC0:
-		RETNZ();
+	}
+	case 0xC0 : {
+		retcc(Cond::nz);
 		cycles = 20;
 		break;
-	case 0xC1:
-		POPBC();
+	}
+	case 0xC1 : {
+		popr16(registerCalls::BC);
 		cycles = 12;
 		break;
-	case 0xC2:
-		JPNZ a16();
-		cycles = 16;
-		break;
-	case 0xC3:
-		JPa16();
-		cycles = 16;
-		break;
-	case 0xC4:
-		CALLNZ a16();
-		cycles = 24;
-		break;
-	case 0xC5:
-		PUSHBC();
-		cycles = 16;
-		break;
-	case 0xC6:
-		ADDA n8();
-		cycles = 8;
-		break;
-	case 0xC7:
-		RST$00();
-		cycles = 16;
-		break;
-	case 0xC8:
-		RETZ();
-		cycles = 20;
-		break;
-	case 0xC9:
-		RET();
-		cycles = 16;
-		break;
-	case 0xCA:
-		JPZ a16();
-		cycles = 16;
-		break;
-	case 0xCB:
-		PREFIX();
-		cycles = 4;
-		break;
-	case 0xCC:
-		CALLZ a16();
-		cycles = 24;
-		break;
-	case 0xCD:
-		CALLa16();
-		cycles = 24;
-		break;
-	case 0xCE:
-		ADCA n8();
-		cycles = 8;
-		break;
-	case 0xCF:
-		RST$08();
-		cycles = 16;
-		break;
-	case 0xD0:
-		RETNC();
-		cycles = 20;
-		break;
-	case 0xD1:
-		POPDE();
-		cycles = 12;
-		break;
-	case 0xD2:
-		JPNC a16();
-		cycles = 16;
-		break;
-	case 0xD4:
-		CALLNC a16();
-		cycles = 24;
-		break;
-	case 0xD5:
-		PUSHDE();
-		cycles = 16;
-		break;
-	case 0xD6:
-		SUBA n8();
-		cycles = 8;
-		break;
-	case 0xD7:
-		RST$10();
-		cycles = 16;
-		break;
-	case 0xD8:
-		RETC();
-		cycles = 20;
-		break;
-	case 0xD9:
-		RETI();
-		cycles = 16;
-		break;
-	case 0xDA:
-		JPC a16();
-		cycles = 16;
-		break;
-	case 0xDC:
-		CALLC a16();
-		cycles = 24;
-		break;
-	case 0xDE:
-		SBCA n8();
-		cycles = 8;
-		break;
-	case 0xDF:
-		RST$18();
-		cycles = 16;
-		break;
-	case 0xE0:
-		LDHa8 A();
-		cycles = 12;
-		break;
-	case 0xE1:
-		POPHL();
-		cycles = 12;
-		break;
-	case 0xE2:
-		LDHC A();
-		cycles = 8;
-		break;
-	case 0xE5:
-		PUSHHL();
-		cycles = 16;
-		break;
-	case 0xE6:
-		ANDA n8();
-		cycles = 8;
-		break;
-	case 0xE7:
-		RST$20();
-		cycles = 16;
-		break;
-	case 0xE8:
-		ADDSP e8();
-		cycles = 16;
-		break;
-	case 0xE9:
-		JPHL();
-		cycles = 4;
-		break;
-	case 0xEA:
-		LDa16 A();
-		cycles = 16;
-		break;
-	case 0xEE:
-		XORA n8();
-		cycles = 8;
-		break;
-	case 0xEF:
-		RST$28();
-		cycles = 16;
-		break;
-	case 0xF0:
-		LDHA a8();
-		cycles = 12;
-		break;
-	case 0xF1:
-		POPAF();
-		cycles = 12;
-		break;
-	case 0xF2:
-		LDHA C();
-		cycles = 8;
-		break;
-	case 0xF3:
-		DI();
-		cycles = 4;
-		break;
-	case 0xF5:
-		PUSHAF();
-		cycles = 16;
-		break;
-	case 0xF6:
-		ORA n8();
-		cycles = 8;
-		break;
-	case 0xF7:
-		RST$30();
-		cycles = 16;
-		break;
-	case 0xF8:
-		LDHL SP e8();
-		cycles = 12;
-		break;
-	case 0xF9:
-		LDSP HL();
-		cycles = 8;
-		break;
-	case 0xFA:
-		LDA a16();
-		cycles = 16;
-		break;
-	case 0xFB:
-		EI();
-		cycles = 4;
-		break;
-	case 0xFE:
-		CPA n8();
-		cycles = 8;
-		break;
-	case 0xFF:
-		RST$38();
+	}
+	case 0xC2 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		jpccn16(Cond::nz, n16);
 		cycles = 16;
 		break;
 	}
+	case 0xC3 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		jpn16(n16);
+		cycles = 16;
+		break;
+	}
+	case 0xC4 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		callccn16(Cond::nz, n16);
+		cycles = 24;
+		break;
+	}
+	case 0xC5 : {
+		pushr16(registerCalls::BC);
+		cycles = 16;
+		break;
+	}
+	case 0xC6 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		addan8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xC7 : {
+		rstvec(0x00);
+		cycles = 16;
+		break;
+	}
+	case 0xC8 : {
+		retcc(Cond::z);
+		cycles = 20;
+		break;
+	}
+	case 0xC9 : {
+		ret();
+		cycles = 16;
+		break;
+	}
+	case 0xCA : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		jpccn16(Cond::z, n16);
+		cycles = 16;
+		break;
+	}
+	case 0xCC : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		callccn16(Cond::z, n16);
+		cycles = 24;
+		break;
+	}
+	case 0xCD : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		calln16(n16);
+		cycles = 24;
+		break;
+	}
+	case 0xCE : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		adcan8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xCF : {
+		rstvec(0x08);
+		cycles = 16;
+		break;
+	}
+	case 0xD0 : {
+		retcc(Cond::nc);
+		cycles = 20;
+		break;
+	}
+	case 0xD1 : {
+		popr16(registerCalls::DE);
+		cycles = 12;
+		break;
+	}
+	case 0xD2 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		jpccn16(Cond::nc, n16);
+		cycles = 16;
+		break;
+	}
+	case 0xD4 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		callccn16(Cond::nc, n16);
+		cycles = 24;
+		break;
+	}
+	case 0xD5 : {
+		pushr16(registerCalls::DE);
+		cycles = 16;
+		break;
+	}
+	case 0xD6 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		suban8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xD7 : {
+		rstvec(0x10);
+		cycles = 16;
+		break;
+	}
+	case 0xD8 : {
+		retcc(Cond::c);
+		cycles = 20;
+		break;
+	}
+	case 0xD9 : {
+		reti();
+		cycles = 16;
+		break;
+	}
+	case 0xDA : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		jpccn16(Cond::c, n16);
+		cycles = 16;
+		break;
+	}
+	case 0xDC : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		callccn16(Cond::c, n16);
+		cycles = 24;
+		break;
+	}
+	case 0xDE : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		sbcn8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xDF : {
+		rstvec(0x18);
+		cycles = 16;
+		break;
+	}
+	case 0xE0 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldhn8a(byte1);
+		cycles = 12;
+		break;
+	}
+	case 0xE1 : {
+		popr16(registerCalls::HL);
+		cycles = 12;
+		break;
+	}
+	case 0xE2 : {
+		ldhca();
+		cycles = 8;
+		break;
+	}
+	case 0xE5 : {
+		pushr16(registerCalls::HL);
+		cycles = 16;
+		break;
+	}
+	case 0xE6 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		andan8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xE7 : {
+		rstvec(0x20);
+		cycles = 16;
+		break;
+	}
+	case 0xE8 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		addspe8(byte1);
+		cycles = 16;
+		break;
+	}
+	case 0xE9 : {
+		jphl();
+		cycles = 4;
+		break;
+	}
+	case 0xEA : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		ldn16a(n16);
+		cycles = 16;
+		break;
+	}
+	case 0xEE : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		xoran8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xEF : {
+		rstvec(0x28);
+		cycles = 16;
+		break;
+	}
+	case 0xF0 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldhan8(byte1);
+		cycles = 12;
+		break;
+	}
+	case 0xF1 : {
+		popaf();
+		cycles = 12;
+		break;
+	}
+	case 0xF2 : {
+		ldhac();
+		cycles = 8;
+		break;
+	}
+	case 0xF3 : {
+		di();
+		cycles = 4;
+		break;
+	}
+	case 0xF5 : {
+		pushaf();
+		cycles = 16;
+		break;
+	}
+	case 0xF6 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		oran8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xF7 : {
+		rstvec(0x30);
+		cycles = 16;
+		break;
+	}
+	case 0xF8 : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		ldhlspe8(byte1);
+		cycles = 12;
+		break;
+	}
+	case 0xF9 : {
+		ldsphl();
+		cycles = 8;
+		break;
+	}
+	case 0xFA : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		uint8_t byte2 = address_space.read(++program_counter);
+		uint16_t n16 = join_bytes(byte2, byte1);
+		ldan16(n16);
+		cycles = 16;
+		break;
+	}
+	case 0xFB : {
+		ei();
+		cycles = 4;
+		break;
+	}
+	case 0xFE : {
+		uint8_t byte1 = address_space.read(++program_counter);
+		cpan8(byte1);
+		cycles = 8;
+		break;
+	}
+	case 0xFF : {
+		rstvec(0x38);
+		cycles = 16;
+		break;
+	}
+	default:
+		printf("invalid opcode?\n");
+	}
 
 
-	block_cycle_n(cycles);
+	block_cycle_n(cycles+4);
+	return program_counter+1;
 }
