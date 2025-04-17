@@ -156,8 +156,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="miscl.cpp" />
     <ClCompile Include="PPU.cpp" />
+    <ClCompile Include="prefixed.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stack.cpp" />
+    <ClCompile Include="unprefixed.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

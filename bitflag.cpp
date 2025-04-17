@@ -1,5 +1,4 @@
 #include "CPU.h"
-
 //bitmasks
 static const uint8_t bitmask[] = {
     0b00000001, 
@@ -13,6 +12,8 @@ static const uint8_t bitmask[] = {
 };
 
 void CPU::bitu3r8(uint8_t bit, registerCalls a) {
+    if (debug)
+        printf("bit u3 r8\n");
     uint8_t temp = retrieve_register_8(a);
     if ((temp & bitmask[bit]) == 0) set_zero(true);
     set_n(false);
@@ -20,6 +21,8 @@ void CPU::bitu3r8(uint8_t bit, registerCalls a) {
 }
 
 void CPU::bitu3hl(uint8_t bit){
+    if (debug)
+        printf("bit u3 hl\n");
     uint16_t add = retrieve_register_16(HL);
     uint8_t temp = address_space.read(add);
     if ((temp & bitmask[bit]) == 0) set_zero(true);
@@ -28,12 +31,16 @@ void CPU::bitu3hl(uint8_t bit){
 }
 
 void CPU::resu3r8(uint8_t bit, registerCalls a){
+    if (debug)
+        printf("res u3 r8\n");
     uint8_t temp = retrieve_register_8(a);
     temp &= ~bitmask[bit];
     store_in_register(a, temp);
 }
 
 void CPU::resu3hl(uint8_t bit){
+    if (debug)
+        printf("res u3 hl\n");
     uint16_t add = retrieve_register_16(HL);
     uint8_t temp = address_space.read(add);
     temp &= ~bitmask[bit];
@@ -41,12 +48,16 @@ void CPU::resu3hl(uint8_t bit){
 }
 
 void CPU::setu3r8(uint8_t bit, registerCalls a){
+    if (debug)
+        printf("set u3 r8\n");
     uint8_t temp = retrieve_register_8(a);
     temp |= bitmask[bit];
     store_in_register(a, temp);
 }
 
 void CPU::setu3hl(uint8_t bit){
+    if (debug)
+        printf("set u3 hl\n");
     uint16_t add = retrieve_register_16(HL);
     uint8_t temp = address_space.read(add);
     temp |= bitmask[bit];

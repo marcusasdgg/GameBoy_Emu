@@ -1,6 +1,8 @@
 #include "CPU.h"
 
 void CPU::andar8(registerCalls a) {
+	if (debug)
+		printf("and r8\n");
 	uint8_t temp = retrieve_register_8(a);
 	A &= temp;
 	if (A == 0) set_zero(true);
@@ -10,6 +12,8 @@ void CPU::andar8(registerCalls a) {
 }
 
 void CPU::andahl(){
+	if (debug)
+		printf("and a hl\n");
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	A &= temp;
@@ -20,6 +24,8 @@ void CPU::andahl(){
 }
 
 void CPU::andan8(uint8_t temp){
+	if (debug)
+		printf("and a n8\n");
 	A &= temp;
 	if (A == 0) set_zero(true);
 	set_n(false);
@@ -28,6 +34,8 @@ void CPU::andan8(uint8_t temp){
 }
 
 void CPU::orar8(registerCalls a){
+	if (debug)
+		printf("or a r8\n");
 	uint8_t temp = retrieve_register_8(a);
 	A |= temp;
 	if (A == 0) set_zero(true);
@@ -37,6 +45,8 @@ void CPU::orar8(registerCalls a){
 }
 
 void CPU::orahl(){
+	if (debug)
+		printf("or a hl\n");
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	A |= temp;
@@ -47,6 +57,8 @@ void CPU::orahl(){
 }
 
 void CPU::oran8(uint8_t temp){
+	if (debug)
+		printf("or a n8\n");
 	A |= temp;
 	if (A == 0) set_zero(true);
 	set_n(false);
@@ -55,6 +67,8 @@ void CPU::oran8(uint8_t temp){
 }
 
 void CPU::xorar8(registerCalls a){
+	if (debug)
+		printf("xor a r8\n");
 	uint8_t temp = retrieve_register_8(a);
 	A ^= temp;
 	if (A == 0) set_zero(true);
@@ -64,6 +78,8 @@ void CPU::xorar8(registerCalls a){
 }
 
 void CPU::xorahl(){
+	if (debug)
+		printf("xor a hl\n");
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	A ^= temp;
@@ -74,6 +90,8 @@ void CPU::xorahl(){
 }
 
 void CPU::xoran8(uint8_t temp){
+	if (debug)
+		printf("xor a n8\n");
 	A ^= temp;
 	if (A == 0) set_zero(true);
 	set_n(false);

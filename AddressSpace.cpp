@@ -42,8 +42,7 @@ void AddressSpace::incr(uint16_t add){
 uint8_t AddressSpace::read(uint16_t address) {
     if (inStartup && address < 256) {
         return bootupRom[address];
-    }
-
+    } 
     if (address >= 0xFF00 && address <= 0xFF7F) {
         // Handle I/O access
     }

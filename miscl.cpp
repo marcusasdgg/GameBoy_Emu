@@ -5,6 +5,8 @@ void CPU::daa() {
 	bool h = get_half_carry();
 	bool c = get_carry();
 	uint8_t adjustment = 0;
+	if (debug)
+		printf("daa\n");
 
 	if (n) {
 		if (h) adjustment += 0x6;
@@ -24,10 +26,13 @@ void CPU::daa() {
 }
 
 void CPU::nop(){
-
+	if (debug)
+		printf("nop\n");
 }
 
 void CPU::stop(){
+	if (debug)
+		printf("stop\n");
 	if (IME) {
 		//stop the clock
 	}

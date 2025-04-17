@@ -62,6 +62,10 @@ void CPU::inititialise() {
 void CPU::execute_loop(uint16_t start_ptr){
 	//before hand run the bootup code.
 	while (isRunning) {
+		//add interrupt
+		if (IME) {
+
+		}
 		try
 		{
 			PC = decode_execute_instruction(PC);
@@ -274,21 +278,29 @@ uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t block = opcode >> 6;
 	switch (block) {
 		case 0:
-			printf("block 0\n\n");
+			if (debug)
+				printf("block 0\n");
 			return handle_block_0(program_counter);
 		case 1:
-			printf("block 1\n\n");
+			if (debug)
+				printf("block 1 \n");
 			return handle_block_1(program_counter);
 		case 2:
-			printf("block 2\n\n");
+			if (debug)
+				printf("block 2 \n");
 			return handle_block_2(program_counter);
 		case 3:
-			printf("block 3\n\n");
+			if (debug)
+				printf("block 3 \n");
 			return handle_block_3(program_counter);
 		default:
+			if (debug)
+				printf("invalid op code\n");
 			//restart the gb
 			return -1;
 	}
+	if (debug)
+		printf("\n");
 	return 0;
 }
 
@@ -424,12 +436,16 @@ bool CPU::get_n(){
 
 
 void CPU::ccf() {
+	if (debug)
+		printf("ccf\n");
 	set_n(false);
 	set_half_carry(false);
 	set_carry(!get_carry());
 }
 
 void CPU::scf(){
+	if (debug)
+		printf("scf\n");
 	set_carry(true);
 	set_half_carry(false);
 	set_n(false);

@@ -8,6 +8,8 @@
 typedef unsigned char byte;
 typedef uint16_t address;
 
+#define debug false
+
 //valid 16bit pairs
 
 enum registerCalls {
@@ -57,7 +59,8 @@ class CPU{
 
 
 // interrupt_check
-		bool interrupt_received();
+		
+		void interrupt_handler();
 
 // flag operations
 		static bool full_carry(uint8_t, uint8_t);
@@ -284,5 +287,7 @@ class CPU{
 		void arithmetic_test();
 		CPU(const CPU&) = delete;
 		CPU& operator=(const CPU&) = delete;
+		uint16_t prefixedCodes(uint8_t program_counter);
+		uint16_t unprefixedCodes(uint8_t program_counter);
 };
 

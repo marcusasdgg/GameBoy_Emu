@@ -8,7 +8,18 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 	registerCalls a = val_to_r8[reg8];
 	byte1 = byte1 >> 3;
 
-	if (byte1 & 7) {
+	if (byte1 == 32) {
+			if (a == HL) {
+				cycles = 2;
+				addahl();
+			}
+			else {
+				cycles = 1;
+				addar8(a);
+			}
+	}
+
+	else if (byte1 & 7) {
 		if (a == HL) {
 			cycles = 2;
 			cpahl();
@@ -19,7 +30,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 6) {
+	else if (byte1 & 6) {
 		if (a == HL) {
 			cycles = 2;
 			orahl();
@@ -30,7 +41,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 5) {
+	else if (byte1 & 5) {
 		if (a == HL) {
 			cycles = 2;
 			xorahl();
@@ -41,7 +52,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 4) {
+	else if (byte1 & 4) {
 		if (a == HL) {
 			cycles = 2;
 			andahl();
@@ -52,7 +63,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 3) {
+	else if (byte1 & 3) {
 		if (a == HL) {
 			cycles = 2;
 			sbcahl();
@@ -63,7 +74,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 2) {
+	else if (byte1 & 2) {
 		if (a == HL) {
 			cycles = 2;
 			subahl();
@@ -74,7 +85,7 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 & 1) {
+	else if (byte1 & 1) {
 		if (a == HL) {
 			cycles = 2;
 			adcahl();
@@ -85,15 +96,11 @@ uint16_t CPU::handle_block_2(uint16_t program_counter) {
 		}
 	}
 
-	if (byte1 == 32) {
-		if (a == HL) {
-			cycles = 2;
-			addahl();
-		}
-		else {
-			cycles = 1;
-			addar8(a);
-		}
+
+
+	else {
+		if (debug)
+			printf("block 2 code invallid"); 
 	}
 
 	block_cycle_n(cycles);

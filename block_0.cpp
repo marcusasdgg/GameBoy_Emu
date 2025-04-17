@@ -1,6 +1,8 @@
 #include "CPU.h"
 
 
+
+
 static void print_binary(uint8_t n) {
 	unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
 
@@ -86,8 +88,14 @@ uint16_t CPU::handle_block_0(uint16_t program_counter) {
 		stop();
 	}
 	else {
-
-		if (first3 == 1) {
+		if (first3 == 0) {
+			uint8_t byte2 = address_space.read(++program_counter);
+			auto cond = get_bit_range(byte1, 3, 4);
+			auto c = val_to_cond[cond];
+			jrcce8(c, byte2);
+			cycles = 3; //???
+		}
+		else if (first3 == 1) {
 			//adhlr16 or ldr16im16
 			registerCalls reg = val_to_r16[r1645];
 			if (get_bit(byte1, 3)) {
@@ -197,6 +205,10 @@ uint16_t CPU::handle_block_0(uint16_t program_counter) {
 			uint8_t byte2 = address_space.read(++program_counter);
 			ldr8n8(reg,byte2);
 			cycles = 2;
+		}
+		else {
+			if (debug)
+				printf("block 0 code invalid: "); print_binary(byte1);
 		}
 
 	}
