@@ -6,7 +6,7 @@
 #include <iostream>
 
 AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
-Clock ck(4000000000,addr);
+Clock ck(200,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;
@@ -17,7 +17,8 @@ char grayscaleToChar(uint8_t value) {
   // Map 0-255 to an index
 	return gradient[value];
 }
-
+//IMPORATNT
+// for the cpu, make each jump instruction return a PC instead of editing pc direclty.
 
 int main() {
 	CPU cpu(addr, ck);

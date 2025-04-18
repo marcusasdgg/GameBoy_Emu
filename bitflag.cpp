@@ -15,7 +15,11 @@ void CPU::bitu3r8(uint8_t bit, registerCalls a) {
     if (debug)
         printf("bit u3 r8\n");
     uint8_t temp = retrieve_register_8(a);
-    if ((temp & bitmask[bit]) == 0) set_zero(true);
+    if ((temp & bitmask[bit]) == 0)
+        set_zero(true);
+    else
+        set_zero(false);
+
     set_n(false);
     set_half_carry(true);
 }

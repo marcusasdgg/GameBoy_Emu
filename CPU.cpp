@@ -63,20 +63,8 @@ void CPU::execute_loop(uint16_t start_ptr){
 	//before hand run the bootup code.
 	while (isRunning) {
 		//add interrupt
-		if (IME) {
-
-		}
-		try
-		{
-			PC = decode_execute_instruction(PC);
-		}
-		catch (const std::exception& e)
-		{
-			std::cout << e.what();
-		}
-		catch (...) {
-			std::cout << "Unknown exception in CPU thread" << std::endl;
-		}
+		PC = decode_execute_instruction(PC);
+		interrupt_handler();
 	}
 }
 void CPU::execute(uint16_t start_ptr) {
@@ -226,6 +214,35 @@ bool CPU::half_carry(uint16_t a , uint16_t b){
 	return ((a & 0xFFF) + (b & 0xFFF) > 0xFFF);
 }
 
+void CPU::interrupt_handler(){
+	if (IME) {
+		uint8_t count = get_interrupt_count();
+		Interrupt intr = get_highest_priority_interrupt();
+		block_cycle_n(8);
+		pushn16(SP);
+		block_cycle_n(8);
+		switch (intr){
+			case JOYPAD:
+				PC = 0x60;
+				break;
+			case Serial:
+				PC = 0x58;
+				break;
+			case Timer:
+				PC = 0x50;
+				break;
+			case LCD:
+				PC = 0x48;
+				break;
+			case VBLANK:
+				PC = 0x40;
+				break;
+		}
+		block_cycle_n(4);
+	}
+	IME = false;
+}
+
 bool CPU::full_carry(uint8_t a, uint8_t b){
 	return (a + b > 0xFF);
 }
@@ -274,11 +291,11 @@ void CPU::print_registers() {
 
 uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t opcode = address_space.read(program_counter);
-	//if (debug) {
-	//	printf("opcode is : 0x");
-	//	std::cout << std::hex << static_cast<int>(opcode) << std::endl;
-	//}
-		
+	if (debug) {
+		printf("pc is : 0x");
+		std::cout << std::hex << static_cast<int>(PC) << std::endl;
+	}
+	
 	if (opcode == 0xCB) {
 		return prefixedCodes(program_counter + 1);
 	}

@@ -8,12 +8,16 @@
 typedef unsigned char byte;
 typedef uint16_t address;
 
-#define debug false
+#define debug true
 
 //valid 16bit pairs
 
 enum registerCalls {
 	A,B,C,D,E,H,L,AF,BC,DE,HL,SP,PC, HLI, HLD
+};
+
+enum Interrupt {
+	JOYPAD,Serial, Timer,LCD,VBLANK
 };
 
 enum Cond {
@@ -252,6 +256,9 @@ class CPU{
 		uint16_t handle_block_1(uint16_t program_counter);
 		uint16_t handle_block_2(uint16_t program_counter);
 		uint16_t handle_block_3(uint16_t program_counter);
+
+		uint8_t get_interrupt_count();
+		Interrupt get_highest_priority_interrupt();
 
 		//decodes the instruction and executes it fetch can be in there somewhere maybe in execute loop
 		uint16_t decode_execute_instruction(uint16_t program_counter);

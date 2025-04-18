@@ -302,3 +302,29 @@ uint16_t CPU::handle_block_3(uint16_t program_counter) {
 
 	return program_counter + 1;
 }
+
+uint8_t CPU::get_interrupt_count(){
+	uint8_t counter = 0;
+	uint8_t iff = address_space.read(IF);
+	uint8_t ie = address_space.read(IE);
+	for (int i = 0 ; i < 5 ; i++){
+		if (get_bit(iff,i) && get_bit(ie,i))
+			counter++;
+	}
+	return counter;
+}
+
+Interrupt CPU::get_highest_priority_interrupt(){
+	uint8_t iff = address_space.read(IF);
+	uint8_t ie = address_space.read(IE);
+	if (get_bit(iff, 0) && get_bit(ie, 0))
+		return Interrupt::VBLANK;
+	else if (get_bit(iff, 1) && get_bit(ie, 1))
+		return Interrupt::LCD;
+	else if (get_bit(iff, 2) && get_bit(ie, 2))
+		return Interrupt::Timer;
+	else if (get_bit(iff, 3) && get_bit(ie, 3))
+		return Interrupt::Serial;
+	else if (get_bit(iff, 4) && get_bit(ie, 4))
+		return Interrupt::JOYPAD;
+}
