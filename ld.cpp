@@ -127,7 +127,7 @@ void CPU::ldhlda() {
 
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	address_space.write(ad, A);
-	//dec(registerCalls::HL);
+	decr16(registerCalls::HL, false);
 }
 
 void CPU::ldahld() {
@@ -197,18 +197,16 @@ void CPU::ldsphl() {
 }
 
 void CPU::ldhan8(uint8_t val){
-	if (debug)
-		printf("ldh a %d\n",val);
-
 	uint16_t ad = 0xFF00 + val;
 	uint8_t by = address_space.read(ad);
+	if (debug)
+		printf("ldh a %s loaded value: %d\n", to_string(val),by);
 	A = by;
 }
 
 void CPU::ldhn8a(uint8_t val){
-	if (debug)
-		printf("ldh %d a\n",val);
-
 	uint16_t ad = 0xFF00 + val;
+	if (debug)
+		printf("ldh %s a\n", to_string(ad));
 	address_space.write(ad, A);
 }

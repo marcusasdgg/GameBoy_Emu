@@ -11,7 +11,7 @@ Clock::Clock(double hz, AddressSpace& a) : addr(a) {
     // Calculate time per cycle in nanoseconds (avoiding floating-point precision issues)
     active = true;
     cycles = 0;
-    time_per_cycle = std::chrono::nanoseconds(static_cast<long long>(1'000'000'000 / hz));
+    time_per_cycle = std::chrono::nanoseconds(static_cast<long long>(1'000'000'000.0 / hz));
 }
 
 void Clock::start_clock(){
@@ -36,13 +36,11 @@ void Clock::clock_loop() {
     while (active) {
         auto now = std::chrono::high_resolution_clock::now();
         std::chrono::duration<long long, std::nano> duration = now - start;
-
         if (duration >= time_per_cycle) {
             tick();
             start = now;
         }
 
-        std::this_thread::sleep_for(std::chrono::nanoseconds(30));
     }
 }
 

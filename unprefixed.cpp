@@ -1,9 +1,11 @@
 #include "CPU.h"
 #include "helpers.h"
 
-uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
+uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
+
 	uint8_t code = address_space.read(program_counter);
 	uint8_t cycles = 0;
+	bool jumped = false;
 
 	switch (code) {
 	case 0x00 : {
@@ -141,7 +143,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	}
 	case 0x18 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		jre8(byte1);
+		program_counter = jre8(byte1);
+		jumped = true;
 		cycles = 12;
 		break;
 	}
@@ -183,8 +186,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	}
 	case 0x20 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		jrcce8(Cond::nz,byte1);
-		cycles = 12;
+		program_counter = jrcce8(Cond::nz,byte1,program_counter, &jumped);
+		if (jumped) {
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0x21 : {
@@ -228,8 +236,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	}
 	case 0x28 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		jrcce8(Cond::z, byte1);
-		cycles = 12;
+		program_counter = jrcce8(Cond::z,byte1,program_counter, &jumped);
+		if (jumped) {
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0x29 : {
@@ -270,8 +283,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	}
 	case 0x30 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		jrcce8(Cond::nc, byte1);
-		cycles = 12;
+		program_counter = jrcce8(Cond::nc, byte1, program_counter, &jumped);
+		if (jumped) {
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0x31 : {
@@ -315,8 +333,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 	}
 	case 0x38 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		jrcce8(Cond::c, byte1);
-		cycles = 12;
+		program_counter = jrcce8(Cond::c, byte1, program_counter, &jumped);
+		if (jumped) {
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0x39 : {
@@ -996,8 +1019,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xC0 : {
-		retcc(Cond::nz);
-		cycles = 20;
+		program_counter = retcc(Cond::nz, program_counter,&jumped);
+		if (jumped) {
+			cycles = 20;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0xC1 : {
@@ -1009,15 +1037,20 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		jpccn16(Cond::nz, n16);
-		cycles = 16;
+		program_counter = jpccn16(Cond::nz, n16, program_counter, &jumped);
+		if (jumped) {
+			cycles = 16;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xC3 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		jpn16(n16);
+		program_counter = jpn16(n16);
 		cycles = 16;
 		break;
 	}
@@ -1025,8 +1058,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		callccn16(Cond::nz, n16);
-		cycles = 24;
+		program_counter = callccn16(Cond::nz, n16,program_counter,&jumped);
+		if (jumped) {
+			cycles = 24;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xC5 : {
@@ -1041,17 +1079,23 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xC7 : {
-		rstvec(0x00);
+		program_counter = rstvec(0x00);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
 	case 0xC8 : {
-		retcc(Cond::z);
-		cycles = 20;
+		program_counter = retcc(Cond::z,program_counter,&jumped);
+		if (jumped) {
+			cycles = 20;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0xC9 : {
-		ret();
+		program_counter = ret();
 		cycles = 16;
 		break;
 	}
@@ -1059,23 +1103,33 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		jpccn16(Cond::z, n16);
-		cycles = 16;
+		program_counter = jpccn16(Cond::z, n16,program_counter, &jumped);
+		if (jumped) {
+			cycles = 16;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xCC : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		callccn16(Cond::z, n16);
-		cycles = 24;
+		program_counter = callccn16(Cond::z, n16, program_counter, &jumped);
+		if (jumped) {
+			cycles = 24;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xCD : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		calln16(n16);
+		program_counter = calln16(n16,program_counter);
 		cycles = 24;
 		break;
 	}
@@ -1086,13 +1140,19 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xCF : {
-		rstvec(0x08);
+		program_counter = rstvec(0x08);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
 	case 0xD0 : {
-		retcc(Cond::nc);
-		cycles = 20;
+		program_counter = retcc(Cond::nc,program_counter,&jumped);
+		if (jumped) {
+			cycles = 20;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0xD1 : {
@@ -1104,16 +1164,26 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		jpccn16(Cond::nc, n16);
-		cycles = 16;
+		program_counter = jpccn16(Cond::nc, n16,program_counter,&jumped);
+		if (jumped) {
+			cycles = 16;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xD4 : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		callccn16(Cond::nc, n16);
-		cycles = 24;
+		program_counter = callccn16(Cond::nc, n16,program_counter,&jumped);
+		if (jumped) {
+			cycles = 24;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xD5 : {
@@ -1128,13 +1198,19 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xD7 : {
-		rstvec(0x10);
+		program_counter = rstvec(0x10);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
 	case 0xD8 : {
-		retcc(Cond::c);
-		cycles = 20;
+		program_counter = retcc(Cond::c,program_counter,&jumped);
+		if (jumped) {
+			cycles = 20;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0xD9 : {
@@ -1146,16 +1222,26 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		jpccn16(Cond::c, n16);
-		cycles = 16;
+		program_counter  = jpccn16(Cond::c, n16,program_counter,&jumped);
+		if (jumped) {
+			cycles = 16;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xDC : {
 		uint8_t byte1 = address_space.read(++program_counter);
 		uint8_t byte2 = address_space.read(++program_counter);
 		uint16_t n16 = join_bytes(byte2, byte1);
-		callccn16(Cond::c, n16);
-		cycles = 24;
+		program_counter = callccn16(Cond::c, n16, program_counter,&jumped);
+		if (jumped) {
+			cycles = 24;
+		}
+		else {
+			cycles = 12;
+		}
 		break;
 	}
 	case 0xDE : {
@@ -1165,7 +1251,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xDF : {
-		rstvec(0x18);
+		program_counter = rstvec(0x18);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
@@ -1197,7 +1284,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xE7 : {
-		rstvec(0x20);
+		program_counter = rstvec(0x20);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
@@ -1208,7 +1296,7 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xE9 : {
-		jphl();
+		program_counter = jphl();
 		cycles = 4;
 		break;
 	}
@@ -1227,7 +1315,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xEF : {
-		rstvec(0x28);
+		program_counter = rstvec(0x28);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
@@ -1264,7 +1353,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xF7 : {
-		rstvec(0x30);
+		program_counter = rstvec(0x30);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
@@ -1299,7 +1389,8 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		break;
 	}
 	case 0xFF : {
-		rstvec(0x38);
+		program_counter = rstvec(0x38);
+		jumped = true;
 		cycles = 16;
 		break;
 	}
@@ -1307,7 +1398,13 @@ uint16_t CPU::unprefixedCodes(uint8_t program_counter) {
 		printf("invalid opcode?\n");
 	}
 
+	if (debug && jumped) {
+		printf("jumped!\n");
+	}
 
+		
+	
 	block_cycle_n(cycles+4);
+	//printf("pc is now %s\n",to_string((uint16_t)(program_counter+1)));
 	return program_counter+1;
 }

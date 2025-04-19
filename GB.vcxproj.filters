@@ -68,18 +68,6 @@
     <ClCompile Include="jump_subroutine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="block_0.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="block_1.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="block_2.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="block_3.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="stack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

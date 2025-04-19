@@ -8,7 +8,7 @@
 typedef unsigned char byte;
 typedef uint16_t address;
 
-#define debug true
+#define debug false
 
 //valid 16bit pairs
 
@@ -155,7 +155,7 @@ class CPU{
 		// decrmenet
 		void decr8(registerCalls);
 		void dechl();
-		void decr16(registerCalls);
+		void decr16(registerCalls,bool print = true);
 		void decsp();
 		//4
 
@@ -211,20 +211,20 @@ class CPU{
 		//20
 
 		//jump and subroutine
-		void calln16(uint16_t val);
-		void callccn16(Cond c, uint16_t val);
-		void jphl();
-		void jpn16(uint16_t val);
-		void jpccn16(Cond c, uint16_t val);
-		void jre8(uint8_t);
-		void jrcce8(Cond c, uint8_t val);
-		void retcc(Cond c);
-		void ret();
-		void reti();
+		uint16_t calln16(uint16_t val, uint16_t program_counter);
+		uint16_t callccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped);
+		uint16_t jphl();
+		uint16_t jpn16(uint16_t val);
+		uint16_t jpccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped);
+		uint16_t jre8(uint8_t);
+		uint16_t jrcce8(Cond c, uint8_t val, uint16_t current_PC, bool* jumped);
+		uint16_t retcc(Cond c, uint16_t current_PC, bool* jumped);
+		uint16_t ret(bool print = true);
+		uint16_t reti();
 		//10
 
 		// if rst vector i.e 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, and 0x38 jump
-		void rstvec(uint8_t val);
+		uint16_t rstvec(uint8_t val);
 
 		//carry flag instructions
 		void ccf();
@@ -233,10 +233,10 @@ class CPU{
 		//stack manipulation instructions
 		void popaf();
 		void popr16(registerCalls a);
-		uint16_t popn16();
+		uint16_t popn16(bool print = false);
 		void pushaf();
-		void pushn8(uint8_t val);
-		void pushn16(uint16_t val);
+		void pushn8(uint8_t val, bool print = false);
+		void pushn16(uint16_t val, bool print = false);
 		void pushr16(registerCalls a);
 
 		//interrupts
@@ -250,12 +250,7 @@ class CPU{
 		void nop();
 		void stop();
 
-		
-
-		uint16_t handle_block_0(uint16_t program_counter);
-		uint16_t handle_block_1(uint16_t program_counter);
-		uint16_t handle_block_2(uint16_t program_counter);
-		uint16_t handle_block_3(uint16_t program_counter);
+	
 
 		uint8_t get_interrupt_count();
 		Interrupt get_highest_priority_interrupt();
@@ -294,7 +289,7 @@ class CPU{
 		void arithmetic_test();
 		CPU(const CPU&) = delete;
 		CPU& operator=(const CPU&) = delete;
-		uint16_t prefixedCodes(uint8_t program_counter);
-		uint16_t unprefixedCodes(uint8_t program_counter);
+		uint16_t prefixedCodes(uint16_t program_counter);
+		uint16_t unprefixedCodes(uint16_t program_counter);
 };
 

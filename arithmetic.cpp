@@ -9,11 +9,18 @@ void CPU::adcar8(registerCalls a) {
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	}
+	else {
+		set_carry(false);
+	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp + carry;
 	if (A == 0) set_zero(true);
+	else  set_zero(false);
 }
 
 void CPU::adcahl() {
@@ -25,11 +32,18 @@ void CPU::adcahl() {
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	}
+	else {
+		set_carry(false);
+	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp + carry;
 	if (A == 0) set_zero(true);
+	else  set_zero(false);
 }
 
 void CPU::adcan8(uint8_t temp) {
@@ -39,11 +53,18 @@ void CPU::adcan8(uint8_t temp) {
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	}
+	else {
+		set_carry(false);
+	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp + carry;
 	if (A == 0) set_zero(true);
+	else  set_zero(false);
 }
 
 void CPU::addar8(registerCalls a) {
@@ -53,11 +74,18 @@ void CPU::addar8(registerCalls a) {
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	}
+	else {
+		set_carry(false);
+	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp;
 	if (A == 0) set_zero(true);
+	else  set_zero(false);
 }
 
 void CPU::addahl() {
@@ -68,11 +96,18 @@ void CPU::addahl() {
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	}
+	else {
+		set_carry(false);
+	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp;
 	if (A == 0) set_zero(true);
+	else  set_zero(false);
 }
 
 void CPU::addan8(uint8_t temp) {
@@ -80,12 +115,18 @@ void CPU::addan8(uint8_t temp) {
 		printf("add a n8\n");
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
+	} else {
+		set_carry(false);
 	}
 	if (half_carry(temp + get_carry(), A)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	A += temp;
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::addhlr16(registerCalls val) {
@@ -97,9 +138,15 @@ void CPU::addhlr16(registerCalls val) {
 	if (half_carry(hl, temp)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 
 	if (full_carry(hl, temp)) {
 		set_carry(true);
+	}
+	else {
+		set_carry(false);
 	}
 	set_zero(false);
 }
@@ -113,9 +160,15 @@ void CPU::addhlsp() {
 	if (half_carry(hl, temp)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 
 	if (full_carry(hl, temp)) {
 		set_carry(true);
+	}
+	else {
+		set_carry(false);
 	}
 	set_zero(false);
 }
@@ -127,10 +180,12 @@ void CPU::addspe8(int8_t e8) {
 	SP = s;
 	set_zero(false);
 	set_n(false);
-	if (((SP & 0xF) + (e8 & 0xF)) > 0xF) F |= 0b00001000;
+	if (((SP & 0xF) + (e8 & 0xF)) > 0xF) set_carry(true);
+	else set_carry(false);
 
 	//checking full carry
-	if (((SP & 0xFF) + (e8 & 0xFF)) > 0xFF) F |= 0b00010000;
+	if (((SP & 0xFF) + (e8 & 0xFF)) > 0xFF) set_half_carry(true);
+	else set_half_carry(false);
 
 }
 
@@ -144,9 +199,12 @@ void CPU::subar8(registerCalls a) {
 
 	set_n(true);
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	if (borrow(before, A)) set_carry(true);
+	else set_carry(false);
 
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::subahl() {
@@ -157,9 +215,12 @@ void CPU::subahl() {
 	uint8_t before = A;
 	A -= temp;
 	if (borrow(before, A)) set_carry(true);
+	else set_carry(false);
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	set_n(true);
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::suban8(uint8_t temp) {
@@ -168,9 +229,12 @@ void CPU::suban8(uint8_t temp) {
 	uint8_t before = A;
 	A -= temp;
 	if (borrow(before, A)) set_carry(true);
+	else set_carry(false);
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	set_n(true);
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::sbcar8(registerCalls a) {
@@ -185,9 +249,12 @@ void CPU::sbcar8(registerCalls a) {
 
 	set_n(true);
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	if (borrow(before, A)) set_carry(true);
+	else set_carry(false);
 
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::sbcahl() {
@@ -200,9 +267,12 @@ void CPU::sbcahl() {
 	A -= temp;
 	A -= cond;
 	if (borrow(before, A)) set_carry(true);
+	else set_carry(false);
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	set_n(true);
 	if (A == 0) set_zero(true);
+	else set_zero(false);
 }
 
 void CPU::sbcn8(uint8_t temp) {
@@ -212,10 +282,21 @@ void CPU::sbcn8(uint8_t temp) {
 	bool cond = get_carry();
 	A -= temp;
 	A -= cond;
-	if (borrow(before, A)) set_carry(true);
+	if (borrow(before, A)) {
+		set_carry(true);
+	}
+	else {
+		set_carry(false);
+	}
 	if (half_borrow(before, A)) set_half_carry(true);
+	else set_half_carry(false);
 	set_n(true);
-	if (A == 0) set_zero(true);
+	if (A == 0) {
+		set_zero(true);
+	}
+	else {
+		set_zero(false);
+	}
 }
 
 void CPU::incr8(registerCalls a) {
@@ -225,11 +306,16 @@ void CPU::incr8(registerCalls a) {
 	store_in_register(a, (uint8_t)(temp + 1));
 	if (half_carry(temp, 1)) {
 		set_half_carry(true);
+	} else{
+		set_half_carry(false);
 	}
 	temp = retrieve_register_8(a);
 	set_n(false);
 	if (temp == 0) {
 		set_zero(true);
+	}
+	else {
+		set_zero(false);
 	}
 
 }
@@ -240,8 +326,18 @@ void CPU::inchl() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	address_space.write(ad, temp + 1);
-	if (half_carry(temp, 1)) set_half_carry(true);
-	if (address_space.read(ad) == 0) set_zero(true);
+	if (half_carry(temp, 1)) {
+		set_half_carry(true);
+	}
+	else {
+		set_half_carry(false);
+	}
+	if (address_space.read(ad) == 0) {
+		set_zero(true);
+	}
+	else {
+		set_zero(false);
+	}
 	set_n(false);
 }
 
@@ -266,10 +362,16 @@ void CPU::decr8(registerCalls a) {
 	if ((temp & 0xF) == 0) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	temp = retrieve_register_8(a);
 	set_n(false);
 	if (temp == 0) {
 		set_zero(true);
+	}
+	else {
+		set_zero(false);
 	}
 	set_n(true);
 }
@@ -287,10 +389,10 @@ void CPU::dechl() {
 	set_n(true);
 }
 
-void CPU::decr16(registerCalls a) {
-	if (debug)
+void CPU::decr16(registerCalls a, bool print) {
+	if (debug && print)
 		printf("dec r16\n");
-	uint8_t temp = retrieve_register_8(a) - 1;
+	uint16_t temp = retrieve_register_16(a) - 1;
 	store_in_register(a, temp);
 }
 
@@ -308,9 +410,19 @@ void CPU::cpan8(uint8_t val){
 		set_half_carry(true);
 	}
 	uint8_t final = A - val;
-	if (final == 0) set_zero(true);
+	if (final == 0) {
+		set_zero(true);
+	}
+	else {
+		set_zero(false);
+	}
 	set_n(true);
-	if (val > A) set_carry(true);
+	if (val > A) {
+		set_carry(true);
+	}
+	else {
+		set_carry(false);
+	}
 }
 
 void CPU::cpl() {
@@ -329,9 +441,19 @@ void CPU::cpar8(registerCalls a) {
 		set_half_carry(true);
 	}
 	uint8_t final = A - val;
-	if (final == 0) set_zero(true);
+	if (final == 0) {
+		set_zero(true);
+	}
+	else {
+		set_zero(false);
+	}
 	set_n(true);
-	if (val > A) set_carry(true);
+	if (val > A) {
+		set_carry(true);
+	}
+	else {
+		set_carry(false);
+	}
 }
 
 void CPU::cpahl() {
@@ -341,8 +463,21 @@ void CPU::cpahl() {
 	if (half_borrow(A, val)) {
 		set_half_carry(true);
 	}
+	else {
+		set_half_carry(false);
+	}
 	uint8_t final = A - val;
-	if (final == 0) set_zero(true);
+	if (final == 0) {
+		set_zero(true);
+	}
+	else {
+		set_zero(false);
+	}
 	set_n(true);
-	if (val > A) set_carry(true);
+	if (val > A) {
+		set_carry(true);
+	}
+	else {
+		set_carry(false);
+	}
 }

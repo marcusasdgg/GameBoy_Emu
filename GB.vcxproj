@@ -142,10 +142,6 @@
     <ClCompile Include="bitflag.cpp" />
     <ClCompile Include="bitshift.cpp" />
     <ClCompile Include="bitwise_logic.cpp" />
-    <ClCompile Include="block_0.cpp" />
-    <ClCompile Include="block_1.cpp" />
-    <ClCompile Include="block_2.cpp" />
-    <ClCompile Include="block_3.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="CPU.cpp" />
     <ClCompile Include="FIFO.cpp" />

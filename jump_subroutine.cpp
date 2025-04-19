@@ -2,80 +2,108 @@
 #include "helpers.h"
 
 
+//32868
 
-
-void CPU::calln16(uint16_t val) {
-	if (debug)
-		printf("call %sn", to_string(val));
-	uint16_t pushed_ad = PC + 3;
-	pushn16(pushed_ad);
-	jpn16(val);
+uint16_t  CPU::calln16(uint16_t val, uint16_t program_counter) {
+	uint16_t pushed_ad = program_counter + 1;
+	if (debug){
+		printf("call %s", to_string(val));
+		printf(" pushed PC = %s\n", to_string(program_counter));
+	}
+	pushn16(pushed_ad, false);
+	return val - 1;
 }
 
-void CPU::callccn16(Cond c, uint16_t val){
+uint16_t CPU::callccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped){
 	if (debug)
-		printf("call %s %s\n", to_string(c), to_string(val));
+		printf("call %s %s pushed pc: %s\n", to_string(c), to_string(val),to_string(current_PC));
 	if (check_cond(c)) {
-		calln16(val);
+		*jumped = true;
+		uint16_t pushed_ad = current_PC+1;
+		pushn16(pushed_ad, false);
+		return val - 1;
+	}
+	else {
+		return current_PC;
 	}
 }
 
-void CPU::jphl(){
+uint16_t CPU::jphl(){
 	if (debug)
 		printf("jp hl\n");
-	PC = HL;
+	return HL - 1;
 }
 
-void CPU::jre8(uint8_t val) {
+uint16_t CPU::jre8(uint8_t val) {
 	int8_t signe = val;
 	if (debug)
 		printf("jr %d\n", signe);
 	uint16_t add = PC + 3 + signe;
-	PC = add - 1;
+	return add - 1;
 }
 
-void CPU::jrcce8(Cond c, uint8_t val){
+uint16_t  CPU::jrcce8(Cond c, uint8_t val, uint16_t current_PC, bool* jumped){
 	if (debug)
 		printf("jr %s %s\n",to_string(c), to_string(val));
-	if (check_cond(c)) jre8(val);
+	if (check_cond(c)) {
+		*jumped = true;
+		int8_t signe = val;
+		uint16_t add = current_PC + 1 + signe;
+
+		return add - 1;
+	}
+	else {
+		return current_PC;
+	}
 }
 
-void CPU::retcc(Cond c){
+uint16_t CPU::retcc(Cond c, uint16_t current_PC, bool* jumped){
 	if (debug)
 		printf("ret %s\n",to_string(c));
-	if (check_cond(c)) ret();
+	if (check_cond(c)) {
+		*jumped = true;
+		return ret(false);
+	}
+	else return current_PC;
 }
 
-void CPU::ret() {
-	if (debug)
-		printf("ret \n");
-	PC = popn16();
+uint16_t CPU::ret(bool print) {
+	uint16_t spc = popn16(false) - 1;
+	if (debug && print)
+		printf("ret PC = %s\n",to_string(spc));
+	return spc;
 }
 
-void CPU::reti(){
+uint16_t CPU::reti(){
 	if (debug)
 		printf("reti \n");
 	ei();
-	ret();
+	return ret(false);
 }
 
-void CPU::rstvec(uint8_t val){
+uint16_t CPU::rstvec(uint8_t val){
 	if (debug)
 		printf("rst %s \n",to_string(val));
 	if (val != 0x00 && val != 0x08 && val != 0x10 && val != 0x18 && val != 0x20 && val != 0x28 && val != 0x30 && val != 0x38) {
 		printf("rst val improper %d", val);
 	}
-	calln16(val);
+	uint16_t pushed_ad = PC + 1;
+	pushn16(pushed_ad, false);
+	return val - 1;
 }
 
-void CPU::jpn16(uint16_t val) {
+uint16_t CPU::jpn16(uint16_t val) {
 	if (debug)
 		printf("jp %s\n",to_string(val));
-	PC = val-1;
+	return val-1;
 }
 
-void CPU::jpccn16(Cond c, uint16_t val){
+uint16_t CPU::jpccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped){
 	if (debug)
 		printf("jp %s %s\n",to_string(c),to_string(val));
-	if (check_cond(c)) jpn16(val);
+	if (check_cond(c)) {
+		*jumped = true;
+		return val - 1;
+	}
+	else return current_PC;
 }

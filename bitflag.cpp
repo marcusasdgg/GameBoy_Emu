@@ -1,5 +1,6 @@
 #include "CPU.h"
 //bitmasks
+#include "helpers.h"
 static const uint8_t bitmask[] = {
     0b00000001, 
     0b00000010, 
@@ -13,12 +14,17 @@ static const uint8_t bitmask[] = {
 
 void CPU::bitu3r8(uint8_t bit, registerCalls a) {
     if (debug)
-        printf("bit u3 r8\n");
+        printf("bit %s %s\n", to_string(bit), to_string(a));
     uint8_t temp = retrieve_register_8(a);
     if ((temp & bitmask[bit]) == 0)
+    {
         set_zero(true);
+    }
     else
+    {
         set_zero(false);
+    }
+        
 
     set_n(false);
     set_half_carry(true);

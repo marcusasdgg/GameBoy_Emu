@@ -12,9 +12,9 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
     std::ifstream inputFile(bootPath, std::ios::binary);
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
         std::istreambuf_iterator<char>());
-    std::copy(buffer.begin(), buffer.end(), bootupRom.begin());
-
-    loadRom(romPath);
+    std::copy(buffer.begin(), buffer.end(), &memory[0]);
+    //bootupRom.begin()
+    //loadRom(romPath);
 }
 
 void AddressSpace::setCpuWriteable(bool cond){
@@ -40,9 +40,9 @@ void AddressSpace::incr(uint16_t add){
 }
 
 uint8_t AddressSpace::read(uint16_t address) {
-    if (inStartup && address < 256) {
-        return bootupRom[address];
-    } 
+    //if (inStartup && address < 256) {
+    //    return bootupRom[address];
+    //} 
     if (address >= 0xFF00 && address <= 0xFF7F) {
         // Handle I/O access
     }

@@ -291,10 +291,10 @@ void CPU::print_registers() {
 
 uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t opcode = address_space.read(program_counter);
-	if (debug) {
-		printf("pc is : 0x");
-		std::cout << std::hex << static_cast<int>(PC) << std::endl;
-	}
+	//if (debug) {
+	//	printf("pc is : 0x");
+	//	std::cout << std::hex << static_cast<int>(PC) << std::endl;
+	//}
 	
 	if (opcode == 0xCB) {
 		return prefixedCodes(program_counter + 1);
@@ -349,24 +349,8 @@ bool CPU::get_bit(uint8_t byte, uint8_t bit) {
 
 
 void CPU::arithmetic_test() {
-	ldr8n8(registerCalls::A, 8);
-	ldr8r8(registerCalls::B, registerCalls::A);
-	addar8(registerCalls::B);
-	decr8(registerCalls::A);
-	incr8(registerCalls::A);
-	subar8(registerCalls::B);
-	print_registers();
-	ldr16n16(registerCalls::HL, 100);
-	ldr16a(registerCalls::HL);
-	decr8(registerCalls::A);
-	decr8(registerCalls::A);
-	decr8(registerCalls::A);
-	dechl();
-	print_registers();
-	ldan16(100);
-	print_registers();
-	dechl();
-	ldan16(100);
+	pushn16(0x1234, true);
+	popn16(true);
 	print_registers();
 }
 
@@ -399,7 +383,7 @@ void CPU::set_half_carry(bool a){
 		F |= 0b00001000;
 	}
 	else {
-		F ^= 0b00001000;
+		F &= ~0b00001000;
 	}
 }
 
@@ -418,7 +402,7 @@ void CPU::set_zero(bool a) {
 		F |= 0b00000010;
 	}
 	else {
-		F ^= 0b00000010;
+		F &= ~0b00000010; 
 	}
 }
 
@@ -427,7 +411,7 @@ void CPU::set_n(bool a){
 		F |= 0b00000100;
 	}
 	else {
-		F ^= 0b00000100;
+		F &= ~0b00000100;
 	}
 }
 
