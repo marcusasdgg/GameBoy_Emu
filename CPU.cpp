@@ -54,13 +54,20 @@ void CPU::inititialise() {
 	IME = 0;
 
 	F = 0;
-	SP = 0xFFFE;
+	SP = 0;
 	PC = 0;
 
 }
 
 
 void CPU::step(){
+	if (PC == 0x0100)
+		tempfuse = true;
+
+	if (!debug && tempfuse) {
+		print_format();
+	}
+
 	PC = decode_execute_instruction(PC);
 
 	interrupt_handler();
@@ -197,9 +204,9 @@ void CPU::interrupt_handler(){
 		uint8_t count = get_interrupt_count();
 		if (count != 0) {
 			Interrupt intr = get_highest_priority_interrupt();
-			printf("interrupt found: %s\n", to_string(intr));
+			// unset intr bit
 			advance_cycles(8);
-			pushn16(SP);
+			pushn16(PC);
 			advance_cycles(8);
 			switch (intr) {
 			case JOYPAD:
@@ -270,6 +277,12 @@ void CPU::print_registers() {
 	print_binary(F);
 }
 
+void CPU::print_format() {
+	printf("A: %02X F: %02X B: %02X C: %02X D: %02X E: %02X H: %02X L: %02X SP: %04X PC: 00:%04X (%02X %02X %02X %02X)\n",
+			A,F,B,C,D,E,H,L, SP, PC, address_space.read(PC), address_space.read(PC+1), address_space.read(PC+2), address_space.read(PC+3)
+		);
+}
+
 uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	uint8_t opcode = address_space.read(program_counter);
 	//if (debug) {
@@ -327,16 +340,11 @@ void CPU::arithmetic_test() {
 
 
 bool CPU::get_carry() {
-	return 0b00010000 & F;
+	return get_bit(F, 4);
 }
 
 void CPU::set_carry(bool a){
-	if (a) {
-		F |= 0b00010000;
-	}
-	else {
-		F &= ~0b00010000;
-	}
+	F = set_bit(F, 4, a);
 }
 
 bool CPU::borrow(uint8_t before, uint8_t after){
@@ -344,16 +352,11 @@ bool CPU::borrow(uint8_t before, uint8_t after){
 }
 
 bool CPU::get_half_carry() {
-	return 0b00001000 & F;
+	return get_bit(F, 5);
 }
 
 void CPU::set_half_carry(bool a){
-	if (a) {
-		F |= 0b00001000;
-	}
-	else {
-		F &= ~0b00001000;
-	}
+	F = set_bit(F, 5, a);
 }
 
 bool CPU::half_borrow(uint8_t before, uint8_t after){
@@ -363,29 +366,19 @@ bool CPU::half_borrow(uint8_t before, uint8_t after){
 
 
 bool CPU::get_zero(){
-	return 0b00000010 & F;
+	return get_bit(F, 7);
 }
 
 void CPU::set_zero(bool a) {
-	if (a) {
-		F |= 0b00000010;
-	}
-	else {
-		F &= ~0b00000010; 
-	}
+	F = set_bit(F, 7, a);
 }
 
 void CPU::set_n(bool a){
-	if (a) {
-		F |= 0b00000100;
-	}
-	else {
-		F &= ~0b00000100;
-	}
+	F = set_bit(F, 6, a);
 }
 
 bool CPU::get_n(){
-	return F & 0b00000100;
+	return get_bit(F, 6);
 }
 
 

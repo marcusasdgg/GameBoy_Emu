@@ -9,6 +9,10 @@ private:
 	// number of cycles
 	uint64_t cycles;
 	AddressSpace& addr;
+	uint64_t cycle_start;
+	uint16_t divcounter = 0;
+
+	void request_timer_interrupt();
 public:
 	Clock(double hz, AddressSpace& a);
 	void tick();

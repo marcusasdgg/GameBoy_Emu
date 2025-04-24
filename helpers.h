@@ -11,6 +11,8 @@ uint8_t get_bit(uint8_t byte, uint8_t bit);
 
 uint16_t join_bytes(uint8_t byte1, uint8_t byte2);
 
+uint8_t set_bit(uint8_t byte, uint8_t bit, bool val);
+
 const char* to_string(registerCalls);
 const char* to_string(Cond);
 

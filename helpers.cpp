@@ -18,6 +18,14 @@ uint16_t join_bytes(uint8_t byte1, uint8_t byte2) {
 	return byte3;
 }
 
+uint8_t set_bit(uint8_t byte, uint8_t bit, bool val) {
+    if (val) {
+        return byte | (1 << bit);
+    }
+    else {
+        return byte & ~(1 << bit);
+    }
+}
 const char* to_string(registerCalls reg) {
     switch (reg) {
     case A:   return "A";

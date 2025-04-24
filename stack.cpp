@@ -4,7 +4,7 @@
 void CPU::popaf() {
 	if (debug)
 		printf("pop af\n");
-	F = address_space.read(SP);
+	F = address_space.read(SP) & 0xF0; //TODO surely u dont need this in the future????
 	SP++;
 	A = address_space.read(SP);
 	SP++;

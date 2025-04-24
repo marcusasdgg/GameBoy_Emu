@@ -170,22 +170,17 @@ void CPU::ldn16sp(uint16_t a) {
 
 
 
-void CPU::ldhlspe8(int16_t e8) {
+void CPU::ldhlspe8(int8_t e8) {
 	if (debug)
 		printf("ld hl sp + %d\n",e8);
 
-	int16_t signed_e8 = static_cast<int16_t>(e8);
-	int16_t result = SP + signed_e8;
+	uint16_t result = SP + e8;
+	store_in_register(HL, result);
 
-	store_in_register(registerCalls::HL, static_cast<uint16_t>(result));
 	set_zero(false);
-	set_n(false);// Z and N are always 0
-
-	//checking half carry
-	if (((SP & 0xF) + (signed_e8 & 0xF)) > 0xF) F |= 0b00001000;
-
-	//checking full carry
-	if (((SP & 0xFF) + (signed_e8 & 0xFF)) > 0xFF) F |= 0b00010000;
+	set_n(false);
+	set_half_carry(half_carry((uint8_t)SP, e8));
+	set_carry(full_carry((uint8_t)SP, e8));
 }
 
 void CPU::ldsphl() {

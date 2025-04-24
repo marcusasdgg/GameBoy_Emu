@@ -58,7 +58,7 @@ void PPU::writeStat() {
 	stat &= 0b11111000;
 	stat |= (state & 0b11);              
 	stat &= ((stat2 & 0x01) << 2); 
-	addr.write(STAT, stat);
+	addr.write(STAT, stat,false);
 }
 
 void PPU::readStat(){
@@ -73,7 +73,7 @@ void PPU::readStat(){
 void PPU::updateMode() {
 	uint8_t stat = (addr.read(STAT) >> 2) << 2;
 	stat |= state;
-	addr.write(STAT, stat);
+	addr.write(STAT, stat, false);
 }
 
 void PPU::setLYCFlag() {
@@ -158,7 +158,7 @@ void PPU::set_vblank_interrupt(){
 
 void PPU::set_stat_interrupt(){
 	uint8_t val = addr.read(IF);
-	addr.write(IF, (val << 1) | 1);
+	addr.write(IF, (val << 1) | 1, false);
 }
 
 
@@ -170,8 +170,8 @@ void PPU::set_stat_interrupt(){
 void PPU::renderScanline(uint8_t scanlineno) {
 
 	renderBackground();
-	renderWindow();
-	renderSprite();
+	//renderWindow();
+	//renderSprite();
 
 	//for (int i = 0; i < 160; i++) {
 	//	printf(" %s ", to_string(scanline_buffer[i]));
@@ -534,7 +534,7 @@ void PPU::step(uint8_t cycles) {
 			setLYCFlag();
 
 			if (addr.read(LY) == 153) {
-				addr.write(LY, 0);
+				addr.write(LY, 0, false);
 				state = OAM;
 				vblank_triggerable = false;
 

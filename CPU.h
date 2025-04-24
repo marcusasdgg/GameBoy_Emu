@@ -8,7 +8,7 @@
 typedef unsigned char byte;
 typedef uint16_t address;
 
-#define debug true
+#define debug false
 
 //valid 16bit pairs
 
@@ -35,27 +35,27 @@ static const Cond val_to_cond[] = { nz,z,nc,c };
 class CPU{
 	private:
 // registers
-
+		bool tempfuse = false;
 		//general registers
-		byte A;
-		byte B;
-		byte C;
-		byte D;
-		byte E;
-		byte H;
-		byte L;
+		byte A = 0;
+		byte B = 0;
+		byte C = 0;
+		byte D = 0;
+		byte E = 0;
+		byte H = 0;
+		byte L = 0;
 
 		//
-		bool IME;
+		bool IME = false;
 		
 		//flag register
-		byte F;
+		byte F = 0;
 
 		// stack pointer
-		uint16_t SP;
+		uint16_t SP = 0;
 
 		// program counter
-		uint16_t PC;
+		uint16_t PC = 0;
 
 		AddressSpace& address_space;
 
@@ -117,7 +117,7 @@ class CPU{
 		void ldahli();
 		void ldspn16(uint16_t);
 		void ldn16sp(uint16_t);
-		void ldhlspe8(int16_t e8);
+		void ldhlspe8(int8_t e8);
 		void ldsphl();
 		void ldhan8(uint8_t val);
 		void ldhn8a(uint8_t val);
@@ -278,6 +278,8 @@ class CPU{
 
 		void inititialise();
 		void print_registers();
+
+		void print_format();
 
 		void execute(uint16_t start_ptr = 0);
 		void stop_execute();

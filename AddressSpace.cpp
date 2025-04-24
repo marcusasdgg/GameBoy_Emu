@@ -14,6 +14,9 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
         std::istreambuf_iterator<char>());
     std::copy(buffer.begin(), buffer.end(),bootupRom.begin());
     loadRom(romPath);
+    write(P1JOYP, 0xFF);
+    if (testMode)
+        memory[LY] = 0x90;
 }
 
 void AddressSpace::setCpuWriteable(bool cond){
@@ -35,6 +38,10 @@ std::array<uint8_t, 6144> AddressSpace::getVRAM()
 }
 
 void AddressSpace::incr(uint16_t add){
+    //TODO remove!!
+    if (testMode && add == LY) {
+        return;
+    }
     memory[add] += 1;
 }
 
@@ -59,8 +66,8 @@ void AddressSpace::loadRom(std::string file_path){
     std::ifstream inputFile(file_path, std::ios::binary);
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
         std::istreambuf_iterator<char>());
-    if (buffer.size() > SIZE) {
-        printf("too big");
+    if (buffer.size() > 32768) {
+        printf("too big needs to be under %lld bytes but is %d bytes\n",SIZE,buffer.size());
         return;
     }
     std::copy(buffer.begin(), buffer.end(), memory);
@@ -88,13 +95,30 @@ void AddressSpace::saveRom(std::string file_path) {
     outputFile.close();
 }
 
-void AddressSpace::write(uint16_t address, uint8_t value) {
+void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
+    //TODO remove!!
+    if (testMode && address == LY) {
+        return;
+    }
+    if (isCPU && !cpuWriteable) {
+        if (address >= 0xFE00 && address <= 0xFE9F) {
+            printf("blocked oam write\n");
+            return;
+        }
+    }
     if (address == 0xFF50 && value != 0) {
         if (debug) {
             printf("disabled bootup rom\n");
         }
        
         inStartup = false;
+    }
+
+    if (address == 0xFF46) {
+        //oam dma
+        uint16_t start_add = (uint16_t)value * 0x100;
+        auto range = get_range(start_add, start_add + 160);
+        std::copy(range.begin(), range.end(), &memory[0xFE00]);
     }
     memory[address] = value;
 }

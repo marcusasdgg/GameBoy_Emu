@@ -4,9 +4,11 @@
 #include<array>
 #include<vector>
 
-#define debug true
+#define testMode false
+#define debug false
+
 //registers
-#define P1JOYP = 0xFF00;
+#define P1JOYP 0xFF00
 #define SB 0xFF01
 #define SC 0xFF02
 #define DIV 0xFF04
@@ -77,7 +79,7 @@ public:
 	//rename to address space...
 	void readRom(std::string file_path);
 	void saveRom(std::string file_path);
-	void write(uint16_t address, uint8_t value);
+	void write(uint16_t address, uint8_t value, bool iscpu = true);
 	AddressSpace(std::string bootupPath, std::string romPath);
 	void setCpuWriteable(bool);
 	std::array<uint8_t,160> getOAM();
@@ -113,3 +115,13 @@ private:
 // ff47 bgp: bg palette data
 // ff48 obp0 pallette
 // ff49 obp1 pallette
+
+
+
+// registers implemented:
+// disable bootup rom
+// timer
+//
+
+//registers to implement:
+// dma

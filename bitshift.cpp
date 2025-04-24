@@ -150,10 +150,10 @@ void CPU::rrr8(registerCalls a){
 	uint8_t temp = retrieve_register_8(a);
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
-	temp |= (carry << 7);
+	temp = set_bit(temp, 7, carry);
 	set_carry(first);
 	store_in_register(a, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -166,10 +166,10 @@ void CPU::rrhl(){
 	uint8_t temp = address_space.read(ad);
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
-	temp |= (carry << 7);
+	temp = set_bit(temp, 7, carry);
 	set_carry(first);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -285,8 +285,9 @@ void CPU::srahl() {
 	if (debug)
 		printf("sra hl\n");
 	uint16_t ad = retrieve_register_16(HL);
-	bool carry = get_carry();
 	uint8_t temp = address_space.read(ad);
+	bool carry = get_carry();
+	
 	uint8_t last = temp & LASTBITMASK;
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
@@ -298,17 +299,17 @@ void CPU::srahl() {
 	set_half_carry(false);
 }
 
-void CPU::srlr8(registerCalls){
+void CPU::srlr8(registerCalls a){
 	if (debug)
 		printf("srl r8\n");
-	uint16_t ad = retrieve_register_16(HL);
+
+	uint8_t temp = retrieve_register_8(a);
 	bool carry = get_carry();
-	uint8_t temp = address_space.read(ad);
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
 	set_carry(first);
-	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	store_in_register(a, temp);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }

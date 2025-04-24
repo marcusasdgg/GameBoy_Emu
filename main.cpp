@@ -10,7 +10,7 @@
 
 #include "helpers.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\04-op r,imm.gb");
 Clock ck(4000000,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
@@ -18,7 +18,7 @@ const int SCREEN_HEIGHT = 144;
 FILE* logFile;
 
 
-#define SECONDS 60
+#define SECONDS 10
 
 // diagnose the cpu because it is broken and does not decomnpress data properly into vram
 
@@ -126,20 +126,26 @@ int main() {
 
 
 	auto memory = addr.getVRAM();
-	std::ofstream outputFile("C:\\Users\\marcu\\Downloads\\vramdumps.txt", std::ios::binary);
+	std::ofstream outputFile("C:\\Users\\marcu\\Downloads\\vramdumpd.txt", std::ios::binary);
 	outputFile.write(reinterpret_cast<const char*>(memory.data()), 6144);
 	outputFile.close();
 
 	auto memory2 = addr.get_range(0x9800, 0x9BFF);
-	std::ofstream outputFile2("C:\\Users\\marcu\\Downloads\\map_dumps.txt", std::ios::binary);
-	outputFile2.write(reinterpret_cast<const char*>(memory2.data()), 6144);
+	std::ofstream outputFile2("C:\\Users\\marcu\\Downloads\\map1_dump.txt", std::ios::binary);
+	outputFile2.write(reinterpret_cast<const char*>(memory2.data()), 1024);
 	outputFile2.close();
 
 
+	auto memory3 = addr.get_range(0x9C00, 0x9FFF);
+	std::ofstream outputFile3("C:\\Users\\marcu\\Downloads\\map2_dump.txt", std::ios::binary);
+	outputFile3.write(reinterpret_cast<const char*>(memory3.data()), 1024);
+	outputFile3.close();
+
 	auto now = std::chrono::high_resolution_clock::now();
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-	printf("%d frames generated in %llds", frames, elapsed_sec);
-	cpu.print_registers();
+	//printf("%d frames generated in %llds", frames, elapsed_sec);
+	//cpu.print_registers();
+	//printf("joypad is %02x\n", addr.read(0xFF00));
 	fclose(logFile);
 	cpu.print_registers();
 }
