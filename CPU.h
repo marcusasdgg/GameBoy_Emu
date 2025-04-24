@@ -224,7 +224,7 @@ class CPU{
 		//10
 
 		// if rst vector i.e 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, and 0x38 jump
-		uint16_t rstvec(uint8_t val, uint16_t current_PC);
+		uint16_t rstvec(uint16_t val, uint16_t current_PC);
 
 		//carry flag instructions
 		void ccf();

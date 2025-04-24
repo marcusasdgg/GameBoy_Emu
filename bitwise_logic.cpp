@@ -5,7 +5,7 @@ void CPU::andar8(registerCalls a) {
 		printf("and r8\n");
 	uint8_t temp = retrieve_register_8(a);
 	A &= temp;
-	if (A == 0) set_zero(true);
+	set_zero(A == 0);
 	set_n(false);
 	set_half_carry(true);
 	set_carry(false);
@@ -17,7 +17,7 @@ void CPU::andahl(){
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	A &= temp;
-	if (A == 0) set_zero(true);
+	set_zero(A == 0);
 	set_n(false);
 	set_half_carry(true);
 	set_carry(false);

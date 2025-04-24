@@ -49,7 +49,7 @@ void CPU::rlr8(registerCalls a) {
 	uint8_t last = LASTBITMASK & temp;
 	set_carry(last);
 	temp = temp << 1;
-	temp |= (uint8_t) carry;
+	temp |= set_bit(temp, 0, carry);
 	
 	store_in_register(a,temp);
 
@@ -71,25 +71,23 @@ void CPU::rlhl(){
 	uint8_t temp = address_space.read(ad);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= (uint8_t) carry;
+	temp = set_bit(temp, 0, carry);
 	set_carry(last);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
-	else set_zero(false);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
 
 void CPU::rla(){
-	uint8_t og = retrieve_register_8(registerCalls::A);
-
+	uint8_t og = A;
 	bool carry = get_carry();
-	uint8_t temp = retrieve_register_8(registerCalls::A);
-	bool last = LASTBITMASK & temp;
+	uint8_t temp = A;
+	uint8_t last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= (uint8_t) carry;
+	temp = set_bit(temp, 0,carry);
 	set_carry(last);
-	store_in_register(registerCalls::A, temp);
+	A = temp;
 	set_zero(false);
 	set_n(false);
 	set_half_carry(false);
@@ -107,7 +105,7 @@ void CPU::rlcr8(registerCalls a){
 	temp |= (uint8_t) last;
 	set_carry(last);
 	store_in_register(a, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -123,7 +121,7 @@ void CPU::rlchl(){
 	temp |= (uint8_t) last;
 	set_carry(last);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -199,7 +197,7 @@ void CPU::rrcr8(registerCalls a){
 	temp |= (first << 7);
 	set_carry(first);
 	store_in_register(a, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -215,7 +213,7 @@ void CPU::rrchl() {
 	temp |= (first << 7);
 	set_carry(first);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -244,7 +242,7 @@ void CPU::slar8(registerCalls a){
 	temp = temp << 1;
 	set_carry(last);
 	store_in_register(a, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -259,7 +257,7 @@ void CPU::slahl(){
 	temp = temp << 1;
 	set_carry(last);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -273,10 +271,10 @@ void CPU::srar8(registerCalls a) {
 	uint8_t last = temp & LASTBITMASK;
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
-	temp |= (last << 7);
+	temp = set_bit(temp, 7, last);
 	set_carry(first);
 	store_in_register(a, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -291,10 +289,10 @@ void CPU::srahl() {
 	uint8_t last = temp & LASTBITMASK;
 	uint8_t first = temp & FIRSTBITMASK;
 	temp = temp >> 1;
-	temp |= (last << 7);
+	temp = set_bit(temp, 7, last);
 	set_carry(first);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -324,7 +322,7 @@ void CPU::srlhl(){
 	temp = temp >> 1;
 	set_carry(first);
 	address_space.write(ad, temp);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 }
@@ -335,7 +333,7 @@ void CPU::swapr8(registerCalls a){
 		printf("swap r8\n");
 	uint8_t temp = retrieve_register_8(a);
 	temp = (temp >> 4) | (temp << 4);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 	set_carry(false);
@@ -348,7 +346,7 @@ void CPU::swaphl(){
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	temp = (temp >> 4) | (temp << 4);
-	if (temp == 0) set_zero(true);
+	set_zero(temp == 0);
 	set_n(false);
 	set_half_carry(false);
 	set_carry(false);

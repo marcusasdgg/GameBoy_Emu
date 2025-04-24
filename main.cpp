@@ -10,7 +10,7 @@
 
 #include "helpers.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\04-op r,imm.gb");
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\09-op r,r.gb");
 Clock ck(4000000,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
@@ -18,7 +18,7 @@ const int SCREEN_HEIGHT = 144;
 FILE* logFile;
 
 
-#define SECONDS 10
+#define SECONDS 40
 
 // diagnose the cpu because it is broken and does not decomnpress data properly into vram
 
@@ -31,7 +31,7 @@ FILE* logFile;
 //reWRITE ENTIRE PROJECT, to USE A single thread that goes by fps timing and not 100% accurate cpu/ppu timings
 
 // could do something like: the jump inbstructions return a PC, check if PC is negative -1, if so return it back into the normal PC else don't change, also make these cases return immediately in their own cases as well.
-
+//00:C69D
 //current main
 int main() {
 

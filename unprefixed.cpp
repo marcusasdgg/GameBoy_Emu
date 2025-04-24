@@ -262,7 +262,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0x2B : {
-		dechl();
+		decr16(registerCalls::HL);
 		cycles = 8;
 		break;
 	}
@@ -1220,7 +1220,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xD9 : {
-		reti();
+		program_counter = reti();
 		cycles = 16;
 		break;
 	}

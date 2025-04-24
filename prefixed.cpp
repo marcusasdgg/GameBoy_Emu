@@ -125,7 +125,7 @@ case 0x16 : {
 		break;
 	}
 case 0x17 : {
-		rla();
+	rlr8(registerCalls::A);
 		cycles = 8;
 		break;
 	}

@@ -4,7 +4,7 @@
 
 void CPU::ldhln8(uint8_t val) {
 	if (debug)
-		printf("ld hl n8\n");
+		printf("ld hl %02X\n",val);
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	address_space.write(ad, val);
 }
@@ -12,20 +12,20 @@ void CPU::ldhln8(uint8_t val) {
 
 void CPU::ldr8r8(registerCalls a, registerCalls b) {
 	if (debug)
-		printf("ld %s %s\n", to_string(a), to_string(b));
+		printf("ld %s %s (%02X -> %02X)\n", to_string(a), to_string(b), retrieve_register_8(a), retrieve_register_8(b));
 	uint8_t temp = retrieve_register_8(b);
 	store_in_register(a, temp);
 }
 
 void CPU::ldr8n8(registerCalls a, uint8_t val) {
 	if (debug)
-		printf("ld %s %d\n", to_string(a),val);
+		printf("ld %s %d (%02x -> %02x)\n", to_string(a),val,retrieve_register_8(a),val);
 	store_in_register(a, val);
 }
 
 void CPU::ldr16n16(registerCalls a, uint16_t val) {
 	if (debug)
-		printf("ld %s %d\n", to_string(a),val);
+		printf("ld %s %04X\n", to_string(a),val);
 	store_in_register(a, val);
 }
 
@@ -41,7 +41,7 @@ void CPU::ldhlr8(registerCalls a) {
 
 void CPU::ldr8hl(registerCalls a) {
 	if (debug)
-		printf("ld %s hl\n", to_string(a));
+		printf("ld %s hl (%02X -> %02X)\n", to_string(a), retrieve_register_8(a),address_space.read(retrieve_register_16(HL)));
 
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	store_in_register(a, address_space.read(ad));
@@ -52,14 +52,14 @@ void CPU::ldr16a(registerCalls a) {
 		printf("ld %s a\n", to_string(a));
 
 	uint16_t ad = retrieve_register_16(a);
-	address_space.write(ad, retrieve_register_8(registerCalls::A));
+	address_space.write(ad, A);
 }
 
 void CPU::ldn16a(uint16_t a) {
 	if (debug)
 		printf("ld %d a\n",a);
 
-	address_space.write(a, retrieve_register_8(registerCalls::A));
+	address_space.write(a, A);
 }
 
 void CPU::ldhn16a(uint16_t a) {
@@ -67,7 +67,7 @@ void CPU::ldhn16a(uint16_t a) {
 		printf("ldh %d a\n",a);
 
 	if (a >= 0xFF00 && a <= 0xFFFF) {
-		address_space.write(a, retrieve_register_8(registerCalls::A));
+		address_space.write(a,A);
 	}
 }
 
@@ -75,24 +75,23 @@ void CPU::ldhca() {
 	if (debug)
 		printf("ldh c a\n");
 
-	address_space.write(A, 0xFF00 + C);
+	address_space.write((uint16_t)(0xFF00 + C),A);
 }
 
 void CPU::ldar16(registerCalls a) {
-	if (debug)
-		printf("ld a %s\n", to_string(a));
 
 	uint16_t temp = retrieve_register_16(a);
+	if (debug)
+		printf("ld a %s (%02X)\n", to_string(a), address_space.read(temp));
+
 	uint8_t val = address_space.read(temp);
 	A = val;
 }
 
 	void CPU::ldan16(uint16_t val) {
 		if (debug)
-			printf("ld a %d\n",val);
-
-		uint8_t temp = address_space.read(val);
-		A = temp;
+			printf("ld a %04X (%02X)\n",val,address_space.read(val));
+		A = address_space.read(val);
 	}
 
 void CPU::ldhan16(uint16_t val) {
@@ -108,8 +107,7 @@ void CPU::ldhan16(uint16_t val) {
 void CPU::ldhac() {
 	if (debug)
 		printf("ldh a c\n");
-
-	address_space.write(0xFF00 + C, retrieve_register_8(registerCalls::A));
+	A = address_space.read((uint16_t)(0xFF00 + C));
 }
 
 void CPU::ldhlia() {
@@ -162,7 +160,7 @@ void CPU::ldn16sp(uint16_t a) {
 		printf("ld %d sp\n",a);
 
 	uint16_t value = retrieve_register_16(registerCalls::SP);
-	uint8_t first = static_cast<uint8_t>(value);
+	uint8_t first = value & 0xFF;
 	uint8_t second = static_cast<uint8_t>(value >> 8);
 	address_space.write(a, first);
 	address_space.write(a + 1, second);

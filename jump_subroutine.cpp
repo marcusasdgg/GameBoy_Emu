@@ -82,7 +82,7 @@ uint16_t CPU::reti(){
 	return ret(false);
 }
 
-uint16_t CPU::rstvec(uint8_t val, uint16_t current_PC){
+uint16_t CPU::rstvec(uint16_t val, uint16_t current_PC){
 	if (debug)
 		printf("rst %s \n",to_string(val));
 	if (val != 0x00 && val != 0x08 && val != 0x10 && val != 0x18 && val != 0x20 && val != 0x28 && val != 0x30 && val != 0x38) {
