@@ -1,7 +1,8 @@
 #include "CPU.h"
 #include "Clock.h"
 #include <iostream>
-
+#include <fstream>
+#include "helpers.h"
 //every function is required to check for interrupts before then after.
 static void print_binary(uint8_t n) {
 	unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
@@ -58,44 +59,19 @@ void CPU::inititialise() {
 
 }
 
-//do in its own thread whoopsies
-void CPU::execute_loop(uint16_t start_ptr){
-	//before hand run the bootup code.
-	while (isRunning) {
-		//add interrupt
-		PC = decode_execute_instruction(PC);
-		interrupt_handler();
-	}
-}
-void CPU::execute(uint16_t start_ptr) {
-	isRunning = true;
-	/*cpu_thread = std::thread([this, start_ptr]() { execute_loop(start_ptr); });*/
-	cpu_thread = std::thread([this, start_ptr]() {
-		//printf("executing thread loop");
-			execute_loop(start_ptr);
-		});
+
+void CPU::step(){
+	PC = decode_execute_instruction(PC);
+
+	interrupt_handler();
 }
 
-void CPU::stop_execute(){
-	printf("stopping cpu\n");
-	isRunning = false;
-	if (cpu_thread.joinable()) {
-		try
-		{
-			cpu_thread.join();
-		}
-		catch (const std::exception& e)
-		{
-			std::cout << "execption occured" << e.what();
-		}
-		catch (...) {
-			std::cout << "Unknown exception in CPU thread" << std::endl;
-		}
-	}
-	else {
-		printf("threa is not joinable");
+void CPU::advance_cycles(uint8_t cycles){
+	for (int i = 0; i < cycles; i++) {
+		clock.tick();
 	}
 }
+
 
 static bool is_16_bit(registerCalls a) {
 	return (a == registerCalls::BC || a == registerCalls::DE || a == registerCalls::HL || a == registerCalls::AF || a == registerCalls::SP || a == registerCalls::PC);
@@ -202,6 +178,8 @@ uint8_t CPU::retrieve_register_8(registerCalls a) {
 			return L;
 			break;
 		default:
+			printf("reg not accepted\n");
+			return 0;
 			break;
 	}
 }
@@ -217,11 +195,13 @@ bool CPU::half_carry(uint16_t a , uint16_t b){
 void CPU::interrupt_handler(){
 	if (IME) {
 		uint8_t count = get_interrupt_count();
-		Interrupt intr = get_highest_priority_interrupt();
-		block_cycle_n(8);
-		pushn16(SP);
-		block_cycle_n(8);
-		switch (intr){
+		if (count != 0) {
+			Interrupt intr = get_highest_priority_interrupt();
+			printf("interrupt found: %s\n", to_string(intr));
+			advance_cycles(8);
+			pushn16(SP);
+			advance_cycles(8);
+			switch (intr) {
 			case JOYPAD:
 				PC = 0x60;
 				break;
@@ -237,8 +217,9 @@ void CPU::interrupt_handler(){
 			case VBLANK:
 				PC = 0x40;
 				break;
+			}
+			advance_cycles(4);
 		}
-		block_cycle_n(4);
 	}
 	IME = false;
 }
@@ -295,14 +276,13 @@ uint16_t CPU::decode_execute_instruction(uint16_t program_counter){
 	//	printf("pc is : 0x");
 	//	std::cout << std::hex << static_cast<int>(PC) << std::endl;
 	//}
-	
+
 	if (opcode == 0xCB) {
 		return prefixedCodes(program_counter + 1);
 	}
 	else {
 		return unprefixedCodes(program_counter);
 	}
-	return 0;
 }
 
 uint8_t CPU::get_bit_range(uint8_t value, uint8_t start, uint8_t end){
@@ -328,19 +308,8 @@ bool CPU::check_cond(Cond c){
 	}
 }
 
-void CPU::block_cycle_n(uint8_t n) {
-	for (int i = 0; i < n*4; i++) {
-		block_cycle_i();
-	}
-}
 
-void CPU::block_cycle_i(){
-	uint64_t cycle_count = clock.get_cycle();
 
-	while (cycle_count == clock.get_cycle()) {
-		std::this_thread::yield();
-	}
-}
 
 bool CPU::get_bit(uint8_t byte, uint8_t bit) {
 	return (byte & (1 << bit)) >> bit;
@@ -366,7 +335,7 @@ void CPU::set_carry(bool a){
 		F |= 0b00010000;
 	}
 	else {
-		F ^= 0b00010000;
+		F &= ~0b00010000;
 	}
 }
 

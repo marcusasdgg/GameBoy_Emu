@@ -2,7 +2,9 @@
 #include <cstdint>
 #include<string>
 #include<array>
+#include<vector>
 
+#define debug true
 //registers
 #define P1JOYP = 0xFF00;
 #define SB 0xFF01
@@ -81,6 +83,8 @@ public:
 	std::array<uint8_t,160> getOAM();
 	std::array<uint8_t, 6144> getVRAM();
 	void incr(uint16_t add);
+
+	std::vector<uint8_t> get_range(uint16_t start, uint16_t end);
 
 private:
 	std::array<uint8_t, 256> bootupRom;

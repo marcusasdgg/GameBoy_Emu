@@ -2,7 +2,9 @@
 #include "helpers.h"
 
 uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
-
+	if (debug) {
+		printf("PC: %s ", to_string(program_counter));
+	}
 	uint8_t code = address_space.read(program_counter);
 	uint8_t cycles = 0;
 	bool jumped = false;
@@ -143,9 +145,13 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 	}
 	case 0x18 : {
 		uint8_t byte1 = address_space.read(++program_counter);
-		program_counter = jre8(byte1);
-		jumped = true;
-		cycles = 12;
+		program_counter = jre8(byte1,program_counter,&jumped);
+		if (jumped) {
+			cycles = 12;
+		}
+		else {
+			cycles = 8;
+		}
 		break;
 	}
 	case 0x19 : {
@@ -1079,7 +1085,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xC7 : {
-		program_counter = rstvec(0x00);
+		program_counter = rstvec(0x00,program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1140,7 +1146,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xCF : {
-		program_counter = rstvec(0x08);
+		program_counter = rstvec(0x08,program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1198,7 +1204,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xD7 : {
-		program_counter = rstvec(0x10);
+		program_counter = rstvec(0x10, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1251,7 +1257,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xDF : {
-		program_counter = rstvec(0x18);
+		program_counter = rstvec(0x18, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1284,7 +1290,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xE7 : {
-		program_counter = rstvec(0x20);
+		program_counter = rstvec(0x20, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1315,7 +1321,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xEF : {
-		program_counter = rstvec(0x28);
+		program_counter = rstvec(0x28, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1353,7 +1359,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xF7 : {
-		program_counter = rstvec(0x30);
+		program_counter = rstvec(0x30, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1389,7 +1395,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 		break;
 	}
 	case 0xFF : {
-		program_counter = rstvec(0x38);
+		program_counter = rstvec(0x38, program_counter);
 		jumped = true;
 		cycles = 16;
 		break;
@@ -1404,7 +1410,7 @@ uint16_t CPU::unprefixedCodes(uint16_t program_counter) {
 
 		
 	
-	block_cycle_n(cycles+4);
+	advance_cycles(cycles);
 	//printf("pc is now %s\n",to_string((uint16_t)(program_counter+1)));
 	return program_counter+1;
 }

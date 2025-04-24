@@ -1,5 +1,6 @@
 #include "helpers.h"
 #include "CPU.h"
+#include "PPU.h"
 
 
 uint8_t get_bit_range(uint8_t value, uint8_t start, uint8_t end){
@@ -49,6 +50,8 @@ const char* to_string(Cond a) {
         return "NC";
     case c:
         return "NC";
+    default:
+        return "WTF";
     }
 }
 
@@ -62,4 +65,51 @@ const char* to_string(uint16_t val){
     static char buffer[7]; // "0x" + 4 hex digits + null terminator
     snprintf(buffer, sizeof(buffer), "0x%04X", val);
     return buffer;
+}
+
+const char* to_string(PPUSTATE state) {
+    switch (state)
+    {
+    case HBLANK:
+        return "HBLANK";
+    case VLANK:
+        return "VBLANK";
+    case OAM:
+        return "OAM";
+    case DRAW:
+        return "DRAW";
+    default:
+        return "WTF";
+    }
+    
+}const char* to_string(PIXEL state) {
+    switch (state)
+    {
+    case GREEN0:
+        return "BLACK";
+    case GREEN1:
+        return "Gray";
+    case GREEN2:
+        return "Green";
+    case GREEN3:
+        return "White";
+    default:
+       return "wtf";
+    }
+}
+
+const char* to_string(Interrupt interrupt) {
+    switch (interrupt)
+    {
+    case JOYPAD:
+        return "JOYPAD";
+    case Serial:
+        return "SERIAL";
+    case Timer:
+        return "TIMER";
+    case LCD:
+        return "STAT";
+    case VBLANK:
+        return "VBLANK";
+    }
 }

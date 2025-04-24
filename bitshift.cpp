@@ -1,21 +1,66 @@
 #include "CPU.h"
+#include "helpers.h"
 const uint8_t LASTBITMASK = 0b10000000;
 const uint8_t FIRSTBITMASK = 1;
 
+std::string print_binary(uint8_t n) {
+	unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
+	std::string s;
+	// Loop through all bits
+	for (int i = 0; i < sizeof(n) * 8; i++) {
+		// Print the current bit
+		s += (n & mask) ? '1' : '0';
+
+		// Shift the mask to the right
+		mask >>= 1;
+
+		// Print space every 8 bits (optional for better readability)
+		if ((i + 1) % 8 == 0) {
+			s += ' ';
+		}
+	}
+	return s;
+}
+
+std::string print_binary(uint16_t n) {
+	unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
+	std::string s;
+	// Loop through all bits
+	for (int i = 0; i < sizeof(n) * 8; i++) {
+		// Print the current bit
+		s += (n & mask) ? '1' : '0';
+
+		// Shift the mask to the right
+		mask >>= 1;
+
+		// Print space every 8 bits (optional for better readability)
+		if ((i + 1) % 8 == 0) {
+			s += ' ';
+		}
+	}
+	return s;
+}
+
 
 void CPU::rlr8(registerCalls a) {
-	if (debug)
-		printf("rl r8\n");
-	bool carry = get_carry();
+	uint8_t og = retrieve_register_8(a);
+	uint8_t carry = get_carry();
 	uint8_t temp = retrieve_register_8(a);
-	bool last = LASTBITMASK & temp;
-	temp = temp << 1;
-	temp |= carry;
+	uint8_t last = LASTBITMASK & temp;
 	set_carry(last);
+	temp = temp << 1;
+	temp |= (uint8_t) carry;
+	
 	store_in_register(a,temp);
+
 	if (temp == 0) set_zero(true);
+	else set_zero(false);
+
 	set_n(false);
 	set_half_carry(false);
+	if (debug)
+		printf("rl %s (%s -> %s) carry: ( %d -> %d )\n", to_string(a), print_binary(og).c_str(), print_binary(temp).c_str(), carry, get_carry());
+
 }
 
 void CPU::rlhl(){
@@ -26,27 +71,30 @@ void CPU::rlhl(){
 	uint8_t temp = address_space.read(ad);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= carry;
+	temp |= (uint8_t) carry;
 	set_carry(last);
 	address_space.write(ad, temp);
 	if (temp == 0) set_zero(true);
+	else set_zero(false);
 	set_n(false);
 	set_half_carry(false);
 }
 
 void CPU::rla(){
-	if (debug)
-		printf("rl a\n");
+	uint8_t og = retrieve_register_8(registerCalls::A);
+
 	bool carry = get_carry();
 	uint8_t temp = retrieve_register_8(registerCalls::A);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= carry;
+	temp |= (uint8_t) carry;
 	set_carry(last);
 	store_in_register(registerCalls::A, temp);
 	set_zero(false);
 	set_n(false);
 	set_half_carry(false);
+	if (debug)
+		printf("rla (%s -> %s) carry: (%d -> %d)\n",print_binary(og).c_str(), print_binary(temp).c_str(), carry,get_carry());
 }
 
 void CPU::rlcr8(registerCalls a){
@@ -56,7 +104,7 @@ void CPU::rlcr8(registerCalls a){
 	uint8_t temp = retrieve_register_8(a);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= last;
+	temp |= (uint8_t) last;
 	set_carry(last);
 	store_in_register(a, temp);
 	if (temp == 0) set_zero(true);
@@ -72,7 +120,7 @@ void CPU::rlchl(){
 	uint8_t temp = address_space.read(ad);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= last;
+	temp |= (uint8_t) last;
 	set_carry(last);
 	address_space.write(ad, temp);
 	if (temp == 0) set_zero(true);
@@ -87,7 +135,7 @@ void CPU::rlca(){
 	uint8_t temp = retrieve_register_8(registerCalls::A);
 	bool last = LASTBITMASK & temp;
 	temp = temp << 1;
-	temp |= last;
+	temp |= (uint8_t) last;
 	set_carry(last);
 	store_in_register(registerCalls::A, temp);
 	set_zero(false);

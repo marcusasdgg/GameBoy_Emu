@@ -99,4 +99,8 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-graphics-d-3.dll" />
+    <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-graphics-3.dll" />
+  </ItemGroup>
 </Project>

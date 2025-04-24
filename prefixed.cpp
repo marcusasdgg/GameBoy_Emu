@@ -1,6 +1,10 @@
 #include "CPU.h"
+#include "helpers.h"
 
 uint16_t CPU::prefixedCodes(uint16_t program_counter) {
+	if (debug) {
+		printf("PC: %s ", to_string(program_counter));
+	}
 	uint8_t code = address_space.read(program_counter);
 	uint8_t cycles = 0;
 
@@ -1287,6 +1291,6 @@ case 0xFF : {
 	}
 	}
 
-	block_cycle_n(cycles);
+	advance_cycles(cycles);
 	return program_counter+1;
 }

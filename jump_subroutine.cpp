@@ -31,14 +31,15 @@ uint16_t CPU::callccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped)
 uint16_t CPU::jphl(){
 	if (debug)
 		printf("jp hl\n");
-	return HL - 1;
+	return retrieve_register_16(registerCalls::HL) - 1;
 }
 
-uint16_t CPU::jre8(uint8_t val) {
+uint16_t CPU::jre8(uint8_t val, uint16_t current_PC, bool* jumped) {
 	int8_t signe = val;
 	if (debug)
-		printf("jr %d\n", signe);
-	uint16_t add = PC + 3 + signe;
+		printf("jr e8 %d\n", signe);
+	uint16_t add = current_PC + 1 + signe;
+	*jumped = true;
 	return add - 1;
 }
 
@@ -81,13 +82,13 @@ uint16_t CPU::reti(){
 	return ret(false);
 }
 
-uint16_t CPU::rstvec(uint8_t val){
+uint16_t CPU::rstvec(uint8_t val, uint16_t current_PC){
 	if (debug)
 		printf("rst %s \n",to_string(val));
 	if (val != 0x00 && val != 0x08 && val != 0x10 && val != 0x18 && val != 0x20 && val != 0x28 && val != 0x30 && val != 0x38) {
 		printf("rst val improper %d", val);
 	}
-	uint16_t pushed_ad = PC + 1;
+	uint16_t pushed_ad = current_PC + 1;
 	pushn16(pushed_ad, false);
 	return val - 1;
 }

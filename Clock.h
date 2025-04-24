@@ -7,27 +7,11 @@
 class Clock{
 private:
 	// number of cycles
-	std::atomic<uint64_t> cycles;
-	bool active;
-	std::chrono::nanoseconds time_per_cycle;
-	std::thread clock_thread;
-
+	uint64_t cycles;
 	AddressSpace& addr;
-
-	// increment the cycle count
-	void tick();
-	void clock_loop();
-
-
 public:
-	Clock(const Clock&) = delete;
-	Clock& operator=(const Clock&) = delete;
 	Clock(double hz, AddressSpace& a);
-	void start_clock();
-
-	void stop_clock();
-
+	void tick();
 	uint64_t get_cycle();
-
 };
 

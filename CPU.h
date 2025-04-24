@@ -8,7 +8,7 @@
 typedef unsigned char byte;
 typedef uint16_t address;
 
-#define debug false
+#define debug true
 
 //valid 16bit pairs
 
@@ -148,7 +148,7 @@ class CPU{
 		//increment
 		void incr8(registerCalls);
 		void inchl();
-		void incr16(registerCalls);
+		void incr16(registerCalls, bool print = true);
 		void incsp();
 		//4
 
@@ -216,7 +216,7 @@ class CPU{
 		uint16_t jphl();
 		uint16_t jpn16(uint16_t val);
 		uint16_t jpccn16(Cond c, uint16_t val, uint16_t current_PC, bool* jumped);
-		uint16_t jre8(uint8_t);
+		uint16_t jre8(uint8_t, uint16_t current_PC, bool* jumped);
 		uint16_t jrcce8(Cond c, uint8_t val, uint16_t current_PC, bool* jumped);
 		uint16_t retcc(Cond c, uint16_t current_PC, bool* jumped);
 		uint16_t ret(bool print = true);
@@ -224,7 +224,7 @@ class CPU{
 		//10
 
 		// if rst vector i.e 0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, and 0x38 jump
-		uint16_t rstvec(uint8_t val);
+		uint16_t rstvec(uint8_t val, uint16_t current_PC);
 
 		//carry flag instructions
 		void ccf();
@@ -251,7 +251,7 @@ class CPU{
 		void stop();
 
 	
-
+		//interrupt stuff
 		uint8_t get_interrupt_count();
 		Interrupt get_highest_priority_interrupt();
 
@@ -261,19 +261,17 @@ class CPU{
 		//given ranges starting from bit start to end inclusive get the number start is the right most least significant left is most signficiant.
 		uint8_t get_bit_range(uint8_t value, uint8_t start, uint8_t end);
 
+		// get bit n of byte
+		bool get_bit(uint8_t byte, uint8_t bit);
+
 		//given a cond return if the cond applies 
 		bool check_cond(Cond c);
 
-		void block_cycle_n(uint8_t n);
 
-		// block until the cycle changes.
-		void block_cycle_i();
+		//step through the cpu
+		
 
-		bool get_bit(uint8_t byte, uint8_t bit);
-
-		bool isRunning = true;
-		void execute_loop(uint16_t start_ptr);
-		std::thread cpu_thread;
+		void advance_cycles(uint8_t cycles);
 	public:
 
 		CPU(AddressSpace& addressSpace, Clock& clock);
@@ -286,9 +284,9 @@ class CPU{
 		// aint gonna work with jumps
 		void execute_single(std::vector<byte>);
 
+		void step();
+
 		void arithmetic_test();
-		CPU(const CPU&) = delete;
-		CPU& operator=(const CPU&) = delete;
 		uint16_t prefixedCodes(uint16_t program_counter);
 		uint16_t unprefixedCodes(uint16_t program_counter);
 };

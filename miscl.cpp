@@ -72,4 +72,8 @@ Interrupt CPU::get_highest_priority_interrupt(){
 	else if (get_bit(iff, 4) && get_bit(ie, 4)) {
 		return Interrupt::JOYPAD;
 	}
+	else {
+		printf("no highest priority\n");
+		return Interrupt::Timer;
+	}
 }

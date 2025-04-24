@@ -1,9 +1,9 @@
 #include "CPU.h"
-
+#include "helpers.h"
 
 void CPU::adcar8(registerCalls a) {
 	if (debug)
-		printf("adc a r8\n");
+		printf("adc a %s\n",to_string(a));
 	uint8_t temp = retrieve_register_8(a);
 	bool carry = get_carry();
 	if (full_carry(temp + get_carry(), A)) {
@@ -26,7 +26,7 @@ void CPU::adcar8(registerCalls a) {
 void CPU::adcahl() {
 	if (debug)
 		printf("adc a hl\n");
-	uint16_t add = retrieve_register_8(registerCalls::HL);
+	uint16_t add = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(add);
 	bool carry = get_carry();
 	if (full_carry(temp + get_carry(), A)) {
@@ -48,7 +48,7 @@ void CPU::adcahl() {
 
 void CPU::adcan8(uint8_t temp) {
 	if (debug)
-		printf("adc a n8\n");
+		printf("adc a %s\n", to_string(temp));
 	bool carry = get_carry();
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
@@ -69,7 +69,7 @@ void CPU::adcan8(uint8_t temp) {
 
 void CPU::addar8(registerCalls a) {
 	if (debug)
-		printf("add a r8\n");
+		printf("add a %s\n", to_string(a));
 	uint8_t temp = retrieve_register_8(a);
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
@@ -91,7 +91,7 @@ void CPU::addar8(registerCalls a) {
 void CPU::addahl() {
 	if (debug)
 		printf("add a hl\n");
-	uint16_t add = retrieve_register_8(registerCalls::HL);
+	uint16_t add = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(add);
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
@@ -112,7 +112,7 @@ void CPU::addahl() {
 
 void CPU::addan8(uint8_t temp) {
 	if (debug)
-		printf("add a n8\n");
+		printf("add a %s\n", to_string(temp));
 	if (full_carry(temp + get_carry(), A)) {
 		set_carry(true);
 	} else {
@@ -131,7 +131,7 @@ void CPU::addan8(uint8_t temp) {
 
 void CPU::addhlr16(registerCalls val) {
 	if (debug)
-		printf("add hl r16\n");
+		printf("add hl %s\n", to_string(val));
 	uint16_t hl = retrieve_register_16(registerCalls::HL);
 	uint16_t temp = retrieve_register_16(val);
 	store_in_register(registerCalls::HL, (uint16_t)(hl + temp));
@@ -175,7 +175,7 @@ void CPU::addhlsp() {
 
 void CPU::addspe8(int8_t e8) {
 	if (debug)
-		printf("add sp e8\n");
+		printf("add sp %s\n", to_string((uint8_t)e8));
 	int16_t s = e8 + SP;
 	SP = s;
 	set_zero(false);
@@ -191,7 +191,7 @@ void CPU::addspe8(int8_t e8) {
 
 void CPU::subar8(registerCalls a) {
 	if (debug)
-		printf("sub a r8\n");
+		printf("sub a %s\n", to_string(a));
 	uint8_t temp = retrieve_register_8(a);
 	uint8_t before = A;
 
@@ -200,6 +200,7 @@ void CPU::subar8(registerCalls a) {
 	set_n(true);
 	if (half_borrow(before, A)) set_half_carry(true);
 	else set_half_carry(false);
+
 	if (borrow(before, A)) set_carry(true);
 	else set_carry(false);
 
@@ -225,7 +226,7 @@ void CPU::subahl() {
 
 void CPU::suban8(uint8_t temp) {
 	if (debug)
-		printf("sub a n8\n");
+		printf("sub a %s\n", to_string(temp));
 	uint8_t before = A;
 	A -= temp;
 	if (borrow(before, A)) set_carry(true);
@@ -239,7 +240,7 @@ void CPU::suban8(uint8_t temp) {
 
 void CPU::sbcar8(registerCalls a) {
 	if (debug)
-		printf("sbc a r8\n");
+		printf("sbc a %s\n", to_string(a));
 	uint8_t temp = retrieve_register_8(a);
 	uint8_t before = A;
 	bool cond = get_carry();
@@ -277,7 +278,7 @@ void CPU::sbcahl() {
 
 void CPU::sbcn8(uint8_t temp) {
 	if (debug)
-		printf("sbc n8\n");
+		printf("sbc %s\n", to_string(temp));
 	uint8_t before = A;
 	bool cond = get_carry();
 	A -= temp;
@@ -301,7 +302,7 @@ void CPU::sbcn8(uint8_t temp) {
 
 void CPU::incr8(registerCalls a) {
 	if (debug)
-		printf("inc r8\n");
+		printf("inc %s\n", to_string(a));
 	uint8_t temp = retrieve_register_8(a);
 	store_in_register(a, (uint8_t)(temp + 1));
 	if (half_carry(temp, 1)) {
@@ -309,6 +310,7 @@ void CPU::incr8(registerCalls a) {
 	} else{
 		set_half_carry(false);
 	}
+
 	temp = retrieve_register_8(a);
 	set_n(false);
 	if (temp == 0) {
@@ -341,9 +343,9 @@ void CPU::inchl() {
 	set_n(false);
 }
 
-void CPU::incr16(registerCalls a) {
-	if (debug)
-		printf("inc r16\n");
+void CPU::incr16(registerCalls a, bool print) {
+	if (debug && print)
+		printf("inc %s\n", to_string(a));
 	uint16_t temp = retrieve_register_16(a) + 1;
 	store_in_register(a, temp);
 }
@@ -355,9 +357,14 @@ void CPU::incsp() {
 }
 
 void CPU::decr8(registerCalls a) {
-	if (debug)
-		printf("dec r8\n");
+
 	uint8_t temp = retrieve_register_8(a);
+	if (debug)
+	{
+		printf("dec %s (%s -> ", to_string(a), to_string(uint8_t(temp)));
+		printf("%s)\n", to_string(uint8_t(temp - 1)));
+	}
+		
 	store_in_register(a, (uint8_t)(temp - 1));
 	if ((temp & 0xF) == 0) {
 		set_half_carry(true);
@@ -391,7 +398,7 @@ void CPU::dechl() {
 
 void CPU::decr16(registerCalls a, bool print) {
 	if (debug && print)
-		printf("dec r16\n");
+		printf("dec %s\n", to_string(a));
 	uint16_t temp = retrieve_register_16(a) - 1;
 	store_in_register(a, temp);
 }
@@ -405,7 +412,7 @@ void CPU::decsp() {
 
 void CPU::cpan8(uint8_t val){
 	if (debug)
-		printf("cp a n8\n");
+		printf("cp a %s\n",to_string(val));
 	if (half_borrow(A, val)) {
 		set_half_carry(true);
 	}
@@ -427,7 +434,7 @@ void CPU::cpan8(uint8_t val){
 
 void CPU::cpl() {
 	if (debug)
-		printf("\n");
+		printf("cpl\n");
 	set_n(true);
 	set_half_carry(true);
 	A = ~ A;
@@ -435,7 +442,7 @@ void CPU::cpl() {
 
 void CPU::cpar8(registerCalls a) {
 	if (debug)
-		printf("cp a r8\n");
+		printf("cp a %s\n", to_string(a));
 	uint8_t val = retrieve_register_8(a);
 	if (half_borrow(A, val)) {
 		set_half_carry(true);

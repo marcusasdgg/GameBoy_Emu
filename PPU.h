@@ -24,12 +24,19 @@ enum PPUSTATE {
 
 //in the future stray away from buffers and use references
 
+#define HBLANKSTART 252
+#define HBLANKEND 339
+#define OAMSTART 0
+#define DRAWSTART 80
+
 class PPU {
 	private:
 		//current state
-		PPUSTATE state;
+		int cycle_counter = 0;
+		PPUSTATE state = OAM;
 
 		int xpos = 0;
+
 
 		//reference to shared objects
 		Clock& clock;
@@ -37,7 +44,7 @@ class PPU {
 
 		int windowLineCounter = 0;
 
-		std::array<uint8_t, 6144> vram_buffer;
+		std::array<uint8_t, 8192> vram_buffer;
 
 		//sprite buffer
 		std::array<Sprite,10> sprite_buffer;
@@ -50,21 +57,21 @@ class PPU {
 		std::array<std::array<PIXEL, 160>, 144> framebuffer;
 		//registers
 		//LCDC register - a mirror of the address map
-		bool LCDENABLE;
-		bool WINMAPSEL;
-		bool WINENABLE;
-		bool TILESEL;
-		bool BGSEL;
-		bool SPRSZE;
-		bool SPRENABLE;
-		bool BGENABLE;
+		bool lcdc0;
+		bool lcdc1;
+		bool lcdc2;
+		bool lcdc3;
+		bool lcdc4;
+		bool lcdc5;
+		bool lcdc6;
+		bool lcdc7;
 
 		//STAT register - mirror of the address map
-		bool LYCLYENABLE;
-		bool MODE2ENABLE;
-		bool MODE1ENABLE;
-		bool MODE0ENABLE;
-		bool COINCIDENCE;
+		bool stat2;
+		bool stat3;
+		bool stat4;
+		bool stat5;
+		bool stat6;
 
 		// 4 functions to perform 4 different modes.
 		//87-204 cycles
@@ -79,6 +86,8 @@ class PPU {
 		//172-289 cycles
 		void Drawing();
 
+
+		std::array<std::array<uint8_t, 32>, 32>  get_background_map(bool);
 
 		void writeStat();
 
@@ -95,18 +104,13 @@ class PPU {
 		uint8_t get_scx();
 		uint8_t get_scy();
 
-		void get_lcdc();
+		
+
+		void write_lcdc();
+
 
 		void set_vblank_interrupt();
 		void set_stat_interrupt();
-
-		void block_n_cycles(int);
-
-		void block_cycles_i();
-
-		void fetch_vram();
-
-		void renderScanline(uint8_t line);
 
 		void renderBackground();
 		
@@ -114,6 +118,9 @@ class PPU {
 
 		void renderSprite();
 
+		
+		
+		
 		uint8_t get_scanline();
 
 		std::array<uint8_t,16> get_tile(int index, bool indexingMethod);
@@ -121,14 +128,18 @@ class PPU {
 
 		uint8_t BACKFIFO;
 		uint8_t SPRITEFIFO;
+		bool oamtriggerable = true;
+		bool vblank_triggerable = true;
 
-		bool action = true;
 
-
-		std::thread ppu_thread;
 	public:
+		void resetBuffers();
+		void read_lcdc();
+		void renderScanline(uint8_t line);
+
 		PPU(AddressSpace& addressSpace, Clock& clock_l);
-		void execute();
+		void step(uint8_t cycles);
+		void reset_cycle_counter();
 		void stop();
 		std::array<std::array<PIXEL,160>,144> getDisplay();
 };
