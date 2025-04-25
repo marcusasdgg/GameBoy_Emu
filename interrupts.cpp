@@ -6,18 +6,25 @@ void CPU::di() {
 		printf("di\n");
 
 	IME = false;
+	triggerIME = false;
 }
 
 void CPU::ei() {
 
 	if (debug)
 		printf("ei\n");
-
-	IME = true;
+	
+	triggerIME = true;
 }
 
 void CPU::halt() {
 	if (debug)
 		printf("halt\n");
-	//???? probabyl some infinite loop
+	Interrupt s = get_highest_priority_interrupt_nonedit();
+	if (IME || s == None) {
+		halted = true;
+	}
+	else {
+		halt_bug = true;
+	}
 }

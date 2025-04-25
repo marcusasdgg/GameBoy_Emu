@@ -61,15 +61,42 @@ void CPU::inititialise() {
 
 
 void CPU::step(){
-	if (PC == 0x0100)
-		tempfuse = true;
 
-	if (!debug && tempfuse) {
-		print_format();
+	//if (PC == 0x0100)
+	//	tempfuse = true;
+
+	//if (!debug && tempfuse) {
+	//	print_format();
+	//}
+
+	// HALT logic
+	if (halted) {
+		if (get_highest_priority_interrupt_nonedit() == None) {
+			advance_cycles(4);
+			return;
+		}
+		halted = false;
 	}
 
+	// HALT bug logic
+	if (halt_bug) {
+		halt_bug = false;
+		uint8_t opcode = address_space.read(PC);
+		decode_execute_instruction(opcode);
+		PC++;
+		return;
+	}
+
+	// IME delayed activation
+	if (triggerIME) {
+		IME = true;
+		triggerIME = false;
+	}
+
+	// Execute next instruction if not halted
 	PC = decode_execute_instruction(PC);
 
+	// Check and handle interrupts
 	interrupt_handler();
 }
 
@@ -203,6 +230,7 @@ void CPU::interrupt_handler(){
 	if (IME) {
 		uint8_t count = get_interrupt_count();
 		if (count != 0) {
+			IME = false;
 			Interrupt intr = get_highest_priority_interrupt();
 			// unset intr bit
 			advance_cycles(8);
@@ -228,7 +256,10 @@ void CPU::interrupt_handler(){
 			advance_cycles(4);
 		}
 	}
-	IME = false;
+	else {
+		//printf("IME was false, trigger IME is %d\n", triggerIME);
+	}
+	
 }
 
 bool CPU::full_carry(uint8_t a, uint8_t b){

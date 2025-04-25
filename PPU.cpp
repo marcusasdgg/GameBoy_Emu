@@ -152,7 +152,7 @@ void PPU::read_lcdc(){
 
 void PPU::set_vblank_interrupt(){
 	uint8_t val = addr.read(IF);
-	addr.write(IF, val | 1);
+	addr.write(IF, val | 1, false);
 }
 
 
@@ -170,13 +170,9 @@ void PPU::set_stat_interrupt(){
 void PPU::renderScanline(uint8_t scanlineno) {
 
 	renderBackground();
-	//renderWindow();
-	//renderSprite();
+	renderWindow();
+	renderSprite();
 
-	//for (int i = 0; i < 160; i++) {
-	//	printf(" %s ", to_string(scanline_buffer[i]));
-	//}
-	//printf("\n");
 	std::copy(scanline_buffer.begin(), scanline_buffer.end(), framebuffer[scanlineno].begin());
 }
 
@@ -184,9 +180,9 @@ void PPU::renderBackground(){
 	read_lcdc();
 
 	int currentScanline = addr.read(LY);
-	int scrollX = addr.read(SCX); 
+	int scrollX = addr.read(SCX);
 	int scrollY = addr.read(SCY);
-	
+
 	int nonZeroPixels = 0;
 
 	if (!lcdc0) {
@@ -197,12 +193,6 @@ void PPU::renderBackground(){
 	//printf("current scanline: %d scroll x: %d scroll y: %d\n", currentScanline, scrollX, scrollY);
 
 	uint16_t tile_map_address = lcdc3 ? 0x9C00 : 0x9800;
-	if (lcdc3) {
-		//printf("using tilemap at 0x9C00\n");
-	}
-	else {
-		//printf("using tilemap at 0x9800\n");
-	}
 
 	for (int x = 0; x < 160; x++) {
 
@@ -233,7 +223,7 @@ void PPU::renderBackground(){
 
 		int bitIndex = 7 - xinTile;
 
-		uint8_t bitlow = get_bit(blow,bitIndex);
+		uint8_t bitlow = get_bit(blow, bitIndex);
 		uint8_t bithigh = get_bit(bhigh, bitIndex);
 
 		uint8_t combined = bithigh << 1 | bitlow;
@@ -245,9 +235,9 @@ void PPU::renderBackground(){
 			nonZeroPixels++;
 		}
 		uint8_t finalColor = (palette >> (combined * 2)) & 0x03;
-		
 
-		switch(finalColor) {
+
+		switch (finalColor) {
 		case 0:
 			scanline_buffer[x] = PIXEL::GREEN0;
 			break;
@@ -266,95 +256,98 @@ void PPU::renderBackground(){
 		}
 		//printf("pallette converted to %d\n", scanline_buffer[x]);
 	}
-	//printf("Scanline %d: %d non-zero pixels\n", currentScanline, nonZeroPixels);
 }
 
-void PPU::renderWindow(){
-	if (lcdc5 == 0) {
-		//printf("window render disabled\n");
+void PPU::renderWindow()
+{
+	read_lcdc();
+	bool use_tile_set_zero = lcdc4;
+	bool use_tile_map_zero = lcdc6;
+
+	if (!lcdc5) return;  // If window rendering is disabled, exit early
+
+	uint16_t tile_set_address = use_tile_set_zero
+		? 0x8000  // Window uses tile set 0, this should be 0x8000, not 0x9C00
+		: 0x8800;  // Tile set 1
+
+	uint16_t tile_map_address = use_tile_map_zero
+		? 0x9C00  // Window map is at 0x9C00
+		: 0x9800;  // Tile map 1
+
+	uint8_t screen_y = addr.read(LY);
+	uint8_t scrolled_y = screen_y - addr.read(WY);  // Subtract WY to get position relative to window start
+
+	// If the current scanline is less than WY, don't render the window
+	if (scrolled_y >= 144 || scrolled_y < 0) {
 		return;
 	}
 
-	int currentScanline = get_scanline();
-	int windowX = addr.read(WX) - 7;
-	int windowY = addr.read(WY);
+	for (uint8_t screen_x = 0; screen_x < 144; screen_x++) {
+		// Adjust for the window's X position using WX and subtract 7 (hardware bug)
+		uint8_t scrolled_x = screen_x + addr.read(WX) - 7;
 
-	if (currentScanline < windowY) return;
-
-	if (currentScanline == windowY) {
-		windowLineCounter = 0;
-	}
-
-	if (currentScanline < windowY) return;
-
-	if (currentScanline == windowY) {
-		windowLineCounter = 0;
-	}
-
-	uint16_t tileMapBase = (lcdc6) != 0 ? 0x9C00 : 0x9800;
-
-	bool windowRendered = false;
-
-	for (int x = 0; x < 160; x++)
-	{
-		if (x < windowX) continue;
-
-		windowRendered = true;
-
-		int windowColumn = x - windowX;
-
-		int tileX = windowColumn / 8;
-		int tileY = windowLineCounter / 8;
-
-		int tileIndex = tileY * 32 + tileX;
-
-		uint8_t tileNumber = addr.read((tileMapBase + tileIndex));
-
-		uint16_t tileDataBase = (lcdc4) != 0 || tileNumber >= 128 ? (uint16_t)0x8000 : (uint16_t)0x9000;
-		uint16_t tileAddress = 0;
-
-		if (lcdc4) {
-			int8_t signedIndex = static_cast<int8_t>(tileNumber);
-			tileAddress = tileDataBase + (int8_t)(signedIndex * 16);
-		}
-		else {
-			tileAddress = tileDataBase + (uint8_t)(tileNumber * 16);
+		// Skip rendering pixels that are outside the window's horizontal range
+		if (scrolled_x < 0 || scrolled_x >= 160) {
+			continue;
 		}
 
-		int lineInTile = windowLineCounter % 8;
+		// Calculate the tile's X and Y coordinates
+		uint8_t tile_x = scrolled_x / 8;
+		uint8_t tile_y = scrolled_y / 8;
 
-		uint8_t tileLow = addr.read(tileAddress + lineInTile * 2);
-		uint8_t  tileHigh = addr.read(tileAddress + lineInTile * 2 + 1);
+		// Find the index of the tile in the map
+		uint8_t tile_index = tile_y * 32 + tile_x;
+		uint16_t tile_id_address = tile_map_address + tile_index;
 
-		int bitIndex = 7 - (windowColumn % 8);
-		int colorBit = ((tileHigh >> bitIndex) & 1) << 1 | ((tileLow >> bitIndex) & 1);
+		// Get the tile ID from the map
+		uint8_t tile_id = addr.read(tile_id_address);
 
-		uint8_t bgp = addr.read(BGP);
-		int paletteShift = colorBit * 2;
-		int paletteColor = (bgp >> paletteShift) & 0b11;
+		// Calculate the offset to the tile data in memory
+		uint16_t tile_data_offset = use_tile_set_zero
+			? tile_id * 16
+			: (static_cast<int8_t>(tile_id) + 128) * 16;
 
-		switch (paletteColor) {
+		// Calculate the offset within the tile for the pixel we're rendering
+		uint8_t tile_pixel_y = scrolled_y % 8;
+		uint16_t tile_data_line_address = tile_set_address + tile_data_offset + tile_pixel_y * 2;
+
+		// Fetch the tile data for the current row of the tile
+		uint8_t pixels_1 = addr.read(tile_data_line_address);
+		uint8_t pixels_2 = addr.read(tile_data_line_address + 1);
+
+		// Get the pixel we need based on the X position within the tile
+		int bitIndex = 7 - (scrolled_x % 8);
+
+		uint8_t bitlow = get_bit(pixels_1, bitIndex);
+		uint8_t bithigh = get_bit(pixels_2, bitIndex);
+
+		uint8_t combined = bithigh << 1 | bitlow;
+
+		uint8_t palette = addr.read(0xFF47);  // Read the palette data
+
+		uint8_t finalColor = (palette >> (combined * 2)) & 0x03;
+
+		// Set the final pixel color based on the palette
+		switch (finalColor) {
 		case 0:
-			scanline_buffer[x] = PIXEL::GREEN0;
+			scanline_buffer[screen_x] = PIXEL::GREEN0;
 			break;
 		case 1:
-			scanline_buffer[x] = PIXEL::GREEN1;
+			scanline_buffer[screen_x] = PIXEL::GREEN1;
 			break;
 		case 2:
-			scanline_buffer[x] = PIXEL::GREEN2;
+			scanline_buffer[screen_x] = PIXEL::GREEN2;
 			break;
 		case 3:
-			scanline_buffer[x] = PIXEL::GREEN3;
+			scanline_buffer[screen_x] = PIXEL::GREEN3;
 			break;
 		default:
-			printf("color pixel fucked ggs\n");
+			printf("Invalid color value!\n");
+			break;
 		}
 	}
-
-	if (windowRendered) {
-		windowLineCounter++;
-	}
 }
+
 
 void PPU::renderSprite(){
 	if (lcdc1 == 0) {

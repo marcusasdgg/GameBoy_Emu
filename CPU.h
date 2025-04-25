@@ -17,7 +17,7 @@ enum registerCalls {
 };
 
 enum Interrupt {
-	JOYPAD,Serial, Timer,LCD,VBLANK
+	JOYPAD,Serial, Timer,LCD,VBLANK, None
 };
 
 enum Cond {
@@ -35,7 +35,10 @@ static const Cond val_to_cond[] = { nz,z,nc,c };
 class CPU{
 	private:
 // registers
+		bool halted = false;
+		bool halt_bug = false;
 		bool tempfuse = false;
+		uint8_t triggerIME = 0;
 		//general registers
 		byte A = 0;
 		byte B = 0;
@@ -253,6 +256,7 @@ class CPU{
 	
 		//interrupt stuff
 		uint8_t get_interrupt_count();
+		Interrupt get_highest_priority_interrupt_nonedit();
 		Interrupt get_highest_priority_interrupt();
 
 		//decodes the instruction and executes it fetch can be in there somewhere maybe in execute loop

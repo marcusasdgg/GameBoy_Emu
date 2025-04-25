@@ -10,7 +10,7 @@
 
 #include "helpers.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\09-op r,r.gb");
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
 Clock ck(4000000,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
@@ -67,10 +67,14 @@ int main() {
 	cycles_per_frame = 69764;
 
 
-	while (true) {
+	while (window.isOpen()) {
 		auto frame_start = std::chrono::high_resolution_clock::now();
 		int cycles_frame = 0;
 		while (cycles_frame < cycles_per_frame) {
+			const std::optional event = window.pollEvent();
+
+			if (event.has_value() && event->is<sf::Event::Closed>())
+				window.close();
 			auto curr_cycle = ck.get_cycle();
 			cpu.step();
 			int cycles_taken = (int) (ck.get_cycle() - curr_cycle);
@@ -104,6 +108,7 @@ int main() {
 		window.clear();
 		window.draw(sprite);
 		window.display();
+
 		ppu.resetBuffers();
 
 		auto frame_end = std::chrono::high_resolution_clock::now();
@@ -115,6 +120,10 @@ int main() {
 
 		auto sleep_til = frame_start + target_frame_time;
 		while (sleep_til > std::chrono::high_resolution_clock::now()) {
+			const std::optional event = window.pollEvent();
+
+			if (event.has_value() && event->is<sf::Event::Closed>())
+				window.close();
 			std::this_thread::yield();
 		}
 
@@ -145,7 +154,7 @@ int main() {
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
 	//printf("%d frames generated in %llds", frames, elapsed_sec);
 	//cpu.print_registers();
-	//printf("joypad is %02x\n", addr.read(0xFF00));
+	printf("joypad is %02x\n", addr.read(0xFF00));
 	fclose(logFile);
 	cpu.print_registers();
 }

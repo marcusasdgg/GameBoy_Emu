@@ -16,16 +16,7 @@ void CPU::bitu3r8(uint8_t bit, registerCalls a) {
     if (debug)
         printf("bit %s %s\n", to_string(bit), to_string(a));
     uint8_t temp = retrieve_register_8(a);
-    if ((temp & bitmask[bit]) == 0)
-    {
-        set_zero(true);
-    }
-    else
-    {
-        set_zero(false);
-    }
-        
-
+    set_zero((temp & bitmask[bit]) == 0);
     set_n(false);
     set_half_carry(true);
 }
@@ -35,7 +26,7 @@ void CPU::bitu3hl(uint8_t bit){
         printf("bit u3 hl\n");
     uint16_t add = retrieve_register_16(HL);
     uint8_t temp = address_space.read(add);
-    if ((temp & bitmask[bit]) == 0) set_zero(true);
+    set_zero((temp & bitmask[bit]) == 0);
     set_n(false);
     set_half_carry(true);
 }

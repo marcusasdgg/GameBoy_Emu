@@ -14,7 +14,7 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
         std::istreambuf_iterator<char>());
     std::copy(buffer.begin(), buffer.end(),bootupRom.begin());
     loadRom(romPath);
-    write(P1JOYP, 0xFF);
+    memory[P1JOYP] = 0xFF;
     if (testMode)
         memory[LY] = 0x90;
 }
@@ -100,6 +100,15 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     if (testMode && address == LY) {
         return;
     }
+
+    if (address == P1JOYP)
+        return;
+
+    //hook
+    //if (address == 0xFF04) {
+    //    printf("IE has value %02X\n", memory[0xFFFF]);
+    //}
+
     if (isCPU && !cpuWriteable) {
         if (address >= 0xFE00 && address <= 0xFE9F) {
             printf("blocked oam write\n");

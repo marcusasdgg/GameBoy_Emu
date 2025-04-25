@@ -55,39 +55,66 @@ uint8_t CPU::get_interrupt_count() {
 	return count;
 }
 
+Interrupt CPU::get_highest_priority_interrupt_nonedit() {
+	uint8_t ie = address_space.read(IE);
+	uint8_t iff = address_space.read(IF);
+	if (get_bit(iff, 0) && get_bit(ie, 0)) {
+		return Interrupt::VBLANK;
+	}
+	else if (get_bit(iff, 1) && get_bit(ie, 1)) {
+		return Interrupt::LCD;
+	}
+	else if (get_bit(iff, 2) && get_bit(ie, 2)) {
+		return Interrupt::Timer;
+	}
+	else if (get_bit(iff, 3) && get_bit(ie, 3)) {
+		return Interrupt::Serial;
+	}
+	else if (get_bit(iff, 4) && get_bit(ie, 4)) {
+		return Interrupt::JOYPAD;
+	}
+	else {
+		return Interrupt::None;
+	}
+}
+
 
 // also unsets if bit
 Interrupt CPU::get_highest_priority_interrupt(){
 	uint8_t ie = address_space.read(IE);
 	uint8_t iff = address_space.read(IF);
 	if (get_bit(iff, 0) && get_bit(ie, 0)) {
-		iff = iff & 0b1111110;
+		printf("vblank interrupt received\n");
+		iff &= 0b1111110;
 		address_space.write(IF, iff);
 		return Interrupt::VBLANK;
 	}
 	else if (get_bit(iff, 1) && get_bit(ie, 1)) {
-		iff = iff & 0b1111101;
+		printf("stat interrupt received\n");
+		iff &= 0b1111101;
 		address_space.write(IF, iff);
 		return Interrupt::LCD;
 	}
 	else if (get_bit(iff, 2) && get_bit(ie, 2)) {
 		printf("timer interrupt received\n");
-		iff = iff & 0b1111011;
+		iff &= 0b1111011;
 		address_space.write(IF, iff);
 		return Interrupt::Timer;
 	}
 	else if (get_bit(iff, 3) && get_bit(ie, 3)) {
-		iff = iff & 0b1110111;
+		printf("serial interrupt received\n");
+		iff &= 0b1110111;
 		address_space.write(IF, iff);
 		return Interrupt::Serial;
 	}
 	else if (get_bit(iff, 4) && get_bit(ie, 4)) {
-		iff = iff & 0b1101111;
+		printf("joypad interrupt received\n");
+		iff &= 0b1101111;
 		address_space.write(IF, iff);
 		return Interrupt::JOYPAD;
 	}
 	else {
 		printf("no highest priority\n");
-		return Interrupt::Timer;
+		return Interrupt::None;
 	}
 }

@@ -50,7 +50,7 @@ void CPU::orahl(){
 	uint16_t ad = retrieve_register_16(HL);
 	uint8_t temp = address_space.read(ad);
 	A |= temp;
-	if (A == 0) set_zero(true);
+	set_zero(A == 0);
 	set_n(false);
 	set_half_carry(false);
 	set_carry(false);

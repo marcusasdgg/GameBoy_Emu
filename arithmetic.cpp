@@ -206,9 +206,9 @@ void CPU::inchl() {
 	uint16_t ad = retrieve_register_16(registerCalls::HL);
 	uint8_t temp = address_space.read(ad);
 	set_n(false);
-	set_zero(temp + 1 == 0);
+	set_zero((uint8_t)(temp + 1) == 0);
 	set_half_carry(half_carry(temp, 1));
-	address_space.write(ad, temp + 1);
+	address_space.write(ad, (uint8_t)(temp + 1));
 }
 
 
