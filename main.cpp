@@ -18,7 +18,7 @@ const int SCREEN_HEIGHT = 144;
 FILE* logFile;
 
 
-#define SECONDS 40
+#define SECONDS 120
 
 // diagnose the cpu because it is broken and does not decomnpress data properly into vram
 
@@ -35,19 +35,22 @@ FILE* logFile;
 //current main
 int main() {
 
+	//up down left right a b select start
+	std::array<bool,8> buttonstate = { 0,0,0,0,0,0,0,0 };
 	
 	CPU cpu(addr, ck);
 	cpu.inititialise();
 
 	int fps = 60; // changes fps
-	uint64_t factor = 60 / 4194304;
-	uint64_t frequency = 4194304; //changes frequency
+	uint64_t frequency = 4194304; //4194304; //changes frequency
 	
 	uint64_t cycles_per_frame = frequency / fps;
 	auto target_frame_time = std::chrono::microseconds(1000000 / fps);
+
+
 	std::cout << "Target frame time: " << target_frame_time.count() << " microseconds\n";
 	printf("cycles per frame %lld \n", cycles_per_frame);
-	freopen_s(&logFile, "C:\\Users\\marcu\\Desktop\\log.txt", "w", stdout);
+	//freopen_s(&logFile, "C:\\Users\\marcu\\Desktop\\log.txt", "w", stdout);
 
 	auto start = std::chrono::high_resolution_clock::now();
 	sf::RenderWindow window(sf::VideoMode(sf::Vector2u(160*4, 144*4)), "Game Boy Emulator");
@@ -64,17 +67,18 @@ int main() {
 
 
 	int frames = 0;
-	cycles_per_frame = 69764;
 
 
 	while (window.isOpen()) {
 		auto frame_start = std::chrono::high_resolution_clock::now();
 		int cycles_frame = 0;
 		while (cycles_frame < cycles_per_frame) {
+			
 			const std::optional event = window.pollEvent();
-
-			if (event.has_value() && event->is<sf::Event::Closed>())
+			if (event.has_value() && event->is<sf::Event::Closed>()) {
 				window.close();
+			}
+				
 			auto curr_cycle = ck.get_cycle();
 			cpu.step();
 			int cycles_taken = (int) (ck.get_cycle() - curr_cycle);
@@ -92,17 +96,102 @@ int main() {
 		for (int y = 0; y < 144; ++y) {
 			for (int x = 0; x < 160; ++x) {
 				PIXEL val = display[y][x];
-				if (val == PIXEL::GREEN0) {
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(255, 255, 255)); // grayscale
+				switch (val)
+				{
+				case GREEN0:
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(255, 255, 255)); // Dark Green
+					break;
+				case GREEN1:
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(255, 0, 0)); // Medium Green
+					break;
+				case GREEN2:
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 255, 0)); // Light Green
+					break;
+				case GREEN3:
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 0, 255)); // Very Light Green
+					break;
+				default:
+					break;
 				}
-				else {
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 0, 0)); // grayscale
-				}
-				
 			}
 		}
-		
-		//frameImage.setPixel(sf::Vector2u(100, 100), sf::Color(256, 256, 0));
+
+
+		// poll for keypresses
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+		{
+			buttonstate[0] = true;
+			printf("up pressed\n");
+		}
+		else {
+			buttonstate[0] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+		{
+			buttonstate[1] = true;
+			printf("down pressed\n");
+		}
+		else {
+			buttonstate[1] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+		{
+			printf("left pressed\n");
+			buttonstate[2] = true;
+		}
+		else {
+			buttonstate[2] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+		{
+			printf("right pressed\n");
+			buttonstate[3] = true;
+		}
+		else {
+			buttonstate[3] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C))
+		{
+			printf("A pressed\n");
+			buttonstate[4] = true;
+		}
+		else {
+			buttonstate[4] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::V))
+		{
+			printf("B pressed\n");
+			buttonstate[5] = true;
+		}
+		else {
+			buttonstate[5] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
+		{
+			printf("select pressed\n");
+			buttonstate[6] = true;
+		}
+		else {
+			buttonstate[6] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X))
+		{
+			printf("start pressed\n");
+			buttonstate[7] = true;
+		}
+		else {
+			buttonstate[7] = false;
+		}
+
+
+		addr.mapbuttons(buttonstate);
 
 		texture.update(frameImage);
 		window.clear();
@@ -115,47 +204,29 @@ int main() {
 		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);
 		frames++;
 
-		if (std::chrono::duration_cast<std::chrono::seconds>(frame_start - start) > std::chrono::seconds(SECONDS))
-			break;
-
 		auto sleep_til = frame_start + target_frame_time;
+
+		if (sleep_til < std::chrono::high_resolution_clock::now())
+			printf("exceeded frame time\n");
+
 		while (sleep_til > std::chrono::high_resolution_clock::now()) {
 			const std::optional event = window.pollEvent();
 
-			if (event.has_value() && event->is<sf::Event::Closed>())
+			if (event.has_value() && event->is<sf::Event::Closed>()) {
 				window.close();
-			std::this_thread::yield();
+			}
+				
+			//std::this_thread::yield();
 		}
 
 		auto now = std::chrono::high_resolution_clock::now();
 		auto frame_total = std::chrono::duration_cast<std::chrono::microseconds>(now - frame_start);
-
-		//printf("Work: %lld mms | Total: %lld mms\n", elapsed.count(), frame_total.count());
 	}
 
 
-	auto memory = addr.getVRAM();
-	std::ofstream outputFile("C:\\Users\\marcu\\Downloads\\vramdumpd.txt", std::ios::binary);
-	outputFile.write(reinterpret_cast<const char*>(memory.data()), 6144);
-	outputFile.close();
-
-	auto memory2 = addr.get_range(0x9800, 0x9BFF);
-	std::ofstream outputFile2("C:\\Users\\marcu\\Downloads\\map1_dump.txt", std::ios::binary);
-	outputFile2.write(reinterpret_cast<const char*>(memory2.data()), 1024);
-	outputFile2.close();
-
-
-	auto memory3 = addr.get_range(0x9C00, 0x9FFF);
-	std::ofstream outputFile3("C:\\Users\\marcu\\Downloads\\map2_dump.txt", std::ios::binary);
-	outputFile3.write(reinterpret_cast<const char*>(memory3.data()), 1024);
-	outputFile3.close();
-
 	auto now = std::chrono::high_resolution_clock::now();
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-	//printf("%d frames generated in %llds", frames, elapsed_sec);
-	//cpu.print_registers();
-	printf("joypad is %02x\n", addr.read(0xFF00));
-	fclose(logFile);
+	//fclose(logFile);
 	cpu.print_registers();
 }
 

@@ -136,16 +136,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="AddressSpace.h" />
+    <ClInclude Include="APU.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="CPU.h" />
     <ClInclude Include="FIFO.h" />
     <ClInclude Include="helpers.h" />
+    <ClInclude Include="MBC.h" />
+    <ClInclude Include="MBC3.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PPU.h" />
     <ClInclude Include="Sprite.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
+    <ClCompile Include="APU.cpp" />
     <ClCompile Include="arithmetic.cpp" />
     <ClCompile Include="bitflag.cpp" />
     <ClCompile Include="bitshift.cpp" />
@@ -158,6 +162,8 @@
     <ClCompile Include="jump_subroutine.cpp" />
     <ClCompile Include="ld.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="MBC.cpp" />
+    <ClCompile Include="MBC3.cpp" />
     <ClCompile Include="miscl.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="prefixed.cpp" />

@@ -96,6 +96,7 @@ void CPU::step(){
 	// Execute next instruction if not halted
 	PC = decode_execute_instruction(PC);
 
+
 	// Check and handle interrupts
 	interrupt_handler();
 }

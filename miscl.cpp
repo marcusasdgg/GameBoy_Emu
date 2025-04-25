@@ -84,25 +84,25 @@ Interrupt CPU::get_highest_priority_interrupt(){
 	uint8_t ie = address_space.read(IE);
 	uint8_t iff = address_space.read(IF);
 	if (get_bit(iff, 0) && get_bit(ie, 0)) {
-		printf("vblank interrupt received\n");
+		//printf("vblank interrupt received\n");
 		iff &= 0b1111110;
 		address_space.write(IF, iff);
 		return Interrupt::VBLANK;
 	}
 	else if (get_bit(iff, 1) && get_bit(ie, 1)) {
-		printf("stat interrupt received\n");
+		//printf("stat interrupt received\n");
 		iff &= 0b1111101;
 		address_space.write(IF, iff);
 		return Interrupt::LCD;
 	}
 	else if (get_bit(iff, 2) && get_bit(ie, 2)) {
-		printf("timer interrupt received\n");
+		//printf("timer interrupt received\n");
 		iff &= 0b1111011;
 		address_space.write(IF, iff);
 		return Interrupt::Timer;
 	}
 	else if (get_bit(iff, 3) && get_bit(ie, 3)) {
-		printf("serial interrupt received\n");
+		//printf("serial interrupt received\n");
 		iff &= 0b1110111;
 		address_space.write(IF, iff);
 		return Interrupt::Serial;

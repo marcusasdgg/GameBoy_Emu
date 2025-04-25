@@ -39,6 +39,8 @@ class CPU{
 		bool halt_bug = false;
 		bool tempfuse = false;
 		uint8_t triggerIME = 0;
+
+		uint8_t joylower;
 		//general registers
 		byte A = 0;
 		byte B = 0;

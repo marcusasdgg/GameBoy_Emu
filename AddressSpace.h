@@ -3,6 +3,8 @@
 #include<string>
 #include<array>
 #include<vector>
+#include "MBC.h"
+#include <memory>
 
 #define testMode false
 #define debug false
@@ -85,11 +87,16 @@ public:
 	std::array<uint8_t,160> getOAM();
 	std::array<uint8_t, 6144> getVRAM();
 	void incr(uint16_t add);
+	
 
 	std::vector<uint8_t> get_range(uint16_t start, uint16_t end);
 
+	void mapbuttons(std::array<bool, 8>& state);
+
 private:
+	MBC* mbc;
 	std::array<uint8_t, 256> bootupRom;
+	std::array<bool, 8> buttonstate;
 	bool inStartup = true;
 	uint8_t memory[SIZE];
 	bool cpuWriteable = false;

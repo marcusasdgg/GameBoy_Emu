@@ -408,22 +408,21 @@ void PPU::renderSprite(){
 				pixelOwner[screenX] = xPos;
 				bool isSpritePalette1 = (attributes & (1 << 4)) != 0;
 
-				uint8_t spritePalette = isSpritePalette1 ? addr.read(OBP0) : addr.read(OBP1);
-				int paletteShift = colorBit * 2;
-				int paletteColor = (spritePalette >> paletteShift) & 0b11;
+				uint8_t spritePalette = isSpritePalette1 ? addr.read(OBP1) : addr.read(OBP0);
+				int paletteColor = (spritePalette >> (colorBit * 2)) & 0b11;
 
 				switch (paletteColor) {
 				case 0:
-					scanline_buffer[x] = PIXEL::GREEN0;
+					scanline_buffer[screenX] = PIXEL::GREEN0;
 					break;
 				case 1:
-					scanline_buffer[x] = PIXEL::GREEN1;
+					scanline_buffer[screenX] = PIXEL::GREEN1;
 					break;
 				case 2:
-					scanline_buffer[x] = PIXEL::GREEN2;
+					scanline_buffer[screenX] = PIXEL::GREEN2;
 					break;
 				case 3:
-					scanline_buffer[x] = PIXEL::GREEN3;
+					scanline_buffer[screenX] = PIXEL::GREEN3;
 					break;
 				default:
 					printf("color pixel fucked ggs\n");
