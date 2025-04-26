@@ -5,6 +5,7 @@
 #include "helpers.h"
 #include "MBC3.h"
 #include "MBC.h"
+#include "NOMBC.h"
 
 static void print_binary(uint8_t n) {
     unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
@@ -32,10 +33,10 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
         std::istreambuf_iterator<char>());
     std::copy(buffer.begin(), buffer.end(),bootupRom.begin());
-    loadRom(romPath);
+    //loadRom(romPath);
     if (testMode)
         memory[LY] = 0x90;
-    mbc = new MBC3(romPath);
+    mbc = new NOMBC(romPath);
 }
 
 void AddressSpace::setCpuWriteable(bool cond){
@@ -60,6 +61,11 @@ void AddressSpace::incr(uint16_t add){
     //TODO remove!!
     if (testMode && add == LY) {
         return;
+    
+    }
+    if (add < 0x7FFF) {
+        mbc->incr(add);
+        return;
     }
     memory[add] += 1;
 }
@@ -82,7 +88,14 @@ void AddressSpace::mapbuttons(std::array<bool,8>& state){
     std::copy(state.begin(), state.end(), buttonstate.begin());
 }
 
+AddressSpace::~AddressSpace()
+{
+    delete mbc;
+}
+
 uint8_t AddressSpace::read(uint16_t address) {
+
+    
 
     if (address == 0xFF00) {
         uint8_t joyp = memory[address];
@@ -117,8 +130,9 @@ uint8_t AddressSpace::read(uint16_t address) {
     if (inStartup && address < 256) {
         return bootupRom[address];
     } 
-    if (address >= 0xFF00 && address <= 0xFF7F) {
-        // Handle I/O access
+
+    if (address < 0x7FFF) {
+        return mbc->read(address);
     }
 
     return memory[address];
@@ -162,8 +176,10 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     if (testMode && address == LY) {
         return;
     }
+
+    //mbc address
     if (address <= 0x7FFF) {
-        //attempt read to rom
+        mbc->write(address,value);
         return;
     }
 
@@ -178,7 +194,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
 
     if (isCPU && !cpuWriteable) {
         if (address >= 0xFE00 && address <= 0xFE9F) {
-            printf("blocked oam write\n");
+            //printf("blocked oam write\n");
             return;
         }
     }
@@ -192,6 +208,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
 
     if (address == 0xFF46) {
         //oam dma
+        printf("oam dma triggered\n");
         uint16_t start_add = (uint16_t)value * 0x100;
         auto range = get_range(start_add, start_add + 160);
         std::copy(range.begin(), range.end(), &memory[0xFE00]);

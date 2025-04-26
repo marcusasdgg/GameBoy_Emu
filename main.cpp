@@ -10,7 +10,7 @@
 
 #include "helpers.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\dmg-acid2.gb");
 Clock ck(4000000,addr);
 PPU ppu(addr, ck);
 const int SCREEN_WIDTH = 160;
@@ -86,7 +86,6 @@ int main() {
 			cycles_frame += cycles_taken;
 		}
 
-		ppu.reset_cycle_counter();
 		addr.write(LY, 0);
 		//reset cycle counter for the next frame
 

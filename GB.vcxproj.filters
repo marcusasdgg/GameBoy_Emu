@@ -48,6 +48,12 @@
     <ClInclude Include="MBC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="MBC1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="NOMBC.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPU.cpp">
@@ -114,6 +120,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="MBC.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MBC1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NOMBC.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

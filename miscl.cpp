@@ -90,7 +90,7 @@ Interrupt CPU::get_highest_priority_interrupt(){
 		return Interrupt::VBLANK;
 	}
 	else if (get_bit(iff, 1) && get_bit(ie, 1)) {
-		//printf("stat interrupt received\n");
+		printf("stat interrupt received\n");
 		iff &= 0b1111101;
 		address_space.write(IF, iff);
 		return Interrupt::LCD;
@@ -108,7 +108,7 @@ Interrupt CPU::get_highest_priority_interrupt(){
 		return Interrupt::Serial;
 	}
 	else if (get_bit(iff, 4) && get_bit(ie, 4)) {
-		printf("joypad interrupt received\n");
+		//printf("joypad interrupt received\n");
 		iff &= 0b1101111;
 		address_space.write(IF, iff);
 		return Interrupt::JOYPAD;

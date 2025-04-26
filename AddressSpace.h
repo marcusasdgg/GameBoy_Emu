@@ -92,6 +92,7 @@ public:
 	std::vector<uint8_t> get_range(uint16_t start, uint16_t end);
 
 	void mapbuttons(std::array<bool, 8>& state);
+	~AddressSpace();
 
 private:
 	MBC* mbc;

@@ -3,8 +3,9 @@
 #include <string>
 class MBC {
 public:
-	virtual uint8_t read(uint16_t address);
-	virtual void write(uint16_t address, uint8_t value);
+	virtual uint8_t read(uint16_t address) = 0;
+	virtual void write(uint16_t address, uint8_t value) = 0;
+	virtual void incr(uint16_t address) = 0;
 	MBC(std::string romPath);
 protected:
 	std::vector<uint8_t> bytes;
