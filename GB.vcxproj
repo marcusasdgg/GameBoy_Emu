@@ -132,6 +132,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>"C:\Users\marcu\Downloads\SFML-3.0.0\lib";</AdditionalLibraryDirectories>
+      <AdditionalDependencies>"sfml-graphics.lib";"sfml-window.lib" ;"sfml-system.lib";$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -147,6 +148,7 @@
     <ClInclude Include="NOMBC.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PPU.h" />
+    <ClInclude Include="PPU2.h" />
     <ClInclude Include="Sprite.h" />
   </ItemGroup>
   <ItemGroup>
@@ -170,6 +172,7 @@
     <ClCompile Include="miscl.cpp" />
     <ClCompile Include="NOMBC.cpp" />
     <ClCompile Include="PPU.cpp" />
+    <ClCompile Include="PPU2.cpp" />
     <ClCompile Include="prefixed.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stack.cpp" />
@@ -178,6 +181,8 @@
   <ItemGroup>
     <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-graphics-3.dll" />
     <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-graphics-d-3.dll" />
+    <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-system-3.dll" />
+    <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-window-3.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -357,7 +357,7 @@ bool CPU::check_cond(Cond c){
 
 
 bool CPU::get_bit(uint8_t byte, uint8_t bit) {
-	return (byte & (1 << bit)) >> bit;
+	return (byte >> bit) & 1;
 }
 
 

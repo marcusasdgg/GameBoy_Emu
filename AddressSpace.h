@@ -49,7 +49,7 @@
 #define BGP 0xFF47
 #define OBP0 0xFF48
 #define OBP1 0xFF49
-#define WY 0xFF41
+#define WY 0xFF4A
 #define WX 0xFF4B
 #define KEY1 0xFF4D
 #define VBK 0xFF4F
@@ -94,6 +94,15 @@ public:
 	void mapbuttons(std::array<bool, 8>& state);
 	~AddressSpace();
 
+	void writeSTAT(uint8_t stat);
+
+	void incrLY();
+
+	void setIF(uint8_t iff);
+	void setSTAT(uint8_t stat);
+
+	
+	uint8_t getVRAMADD(uint16_t address);
 private:
 	MBC* mbc;
 	std::array<uint8_t, 256> bootupRom;

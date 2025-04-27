@@ -75,19 +75,10 @@ class PPU {
 
 		// 4 functions to perform 4 different modes.
 		//87-204 cycles
-		void HBlank();
-
-		//4560 cycles
-		void VBlank();
-
-		//80 cycles
-		void OAMScan();
-
-		//172-289 cycles
-		void Drawing();
-
 
 		std::array<std::array<uint8_t, 32>, 32>  get_background_map(bool);
+
+		PIXEL int_to_pixel(uint8_t pixel, uint16_t palAdd);
 
 		void writeStat();
 
@@ -97,16 +88,11 @@ class PPU {
 
 		void setLYCFlag();
 
-		//execution_loop
-		void execute_loop();
 
 		//helper functions
 		uint8_t get_scx();
 		uint8_t get_scy();
 
-		
-
-		void write_lcdc();
 
 
 		void set_vblank_interrupt();

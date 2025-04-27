@@ -9,23 +9,25 @@
 #include <fstream>
 
 #include "helpers.h"
+#include "PPU2.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\dmg-acid2.gb");
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\Pokemon Blue.gb");
 Clock ck(4000000,addr);
-PPU ppu(addr, ck);
+PPU ppu(addr,ck);
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;
 FILE* logFile;
 
 
-#define SECONDS 120
+
+#define FACTOR 10
 
 // diagnose the cpu because it is broken and does not decomnpress data properly into vram
 
 //IMPORATNT
 // for the cpu, make each jump instruction return a PC instead of editing pc direclty.
 
-// fix teh issue of:
+// fix teh issue of:c
 // editing the PC when jumping.
 
 //reWRITE ENTIRE PROJECT, to USE A single thread that goes by fps timing and not 100% accurate cpu/ppu timings
@@ -40,9 +42,9 @@ int main() {
 	
 	CPU cpu(addr, ck);
 	cpu.inititialise();
-
-	int fps = 60; // changes fps
-	uint64_t frequency = 4194304; //4194304; //changes frequency
+	int missedFrames = 0;
+	int fps = 60*FACTOR; // changes fps
+	uint64_t frequency = 4194304*FACTOR; //4194304; //changes frequency
 	
 	uint64_t cycles_per_frame = frequency / fps;
 	auto target_frame_time = std::chrono::microseconds(1000000 / fps);
@@ -73,12 +75,7 @@ int main() {
 		auto frame_start = std::chrono::high_resolution_clock::now();
 		int cycles_frame = 0;
 		while (cycles_frame < cycles_per_frame) {
-			
-			const std::optional event = window.pollEvent();
-			if (event.has_value() && event->is<sf::Event::Closed>()) {
-				window.close();
-			}
-				
+		
 			auto curr_cycle = ck.get_cycle();
 			cpu.step();
 			int cycles_taken = (int) (ck.get_cycle() - curr_cycle);
@@ -86,7 +83,7 @@ int main() {
 			cycles_frame += cycles_taken;
 		}
 
-		addr.write(LY, 0);
+		//addr.write(LY, 0);
 		//reset cycle counter for the next frame
 
 		auto display = ppu.getDisplay();
@@ -98,16 +95,16 @@ int main() {
 				switch (val)
 				{
 				case GREEN0:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(255, 255, 255)); // Dark Green
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0xFF, 0xFF, 0xFF)); // Dark Green
 					break;
 				case GREEN1:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(255, 0, 0)); // Medium Green
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0xFF, 0,0)); // Medium Green
 					break;
 				case GREEN2:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 255, 0)); // Light Green
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 0xFF, 0)); // Light Green
 					break;
 				case GREEN3:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 0, 255)); // Very Light Green
+					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0,0, 0xFF)); // Very Light Green
 					break;
 				default:
 					break;
@@ -115,8 +112,8 @@ int main() {
 			}
 		}
 
+		
 
-		// poll for keypresses
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
 		{
 			buttonstate[0] = true;
@@ -205,18 +202,20 @@ int main() {
 
 		auto sleep_til = frame_start + target_frame_time;
 
-		if (sleep_til < std::chrono::high_resolution_clock::now())
+		if (sleep_til < std::chrono::high_resolution_clock::now()) {
+			missedFrames++;
 			printf("exceeded frame time\n");
+		}
+			
 
-		while (sleep_til > std::chrono::high_resolution_clock::now()) {
+		while (sleep_til > std::chrono::high_resolution_clock::now()) {		
 			const std::optional event = window.pollEvent();
-
 			if (event.has_value() && event->is<sf::Event::Closed>()) {
 				window.close();
 			}
-				
-			//std::this_thread::yield();
+			std::this_thread::yield();
 		}
+
 
 		auto now = std::chrono::high_resolution_clock::now();
 		auto frame_total = std::chrono::duration_cast<std::chrono::microseconds>(now - frame_start);
@@ -225,7 +224,12 @@ int main() {
 
 	auto now = std::chrono::high_resolution_clock::now();
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
+	printf("missed %d frames", missedFrames);
 	//fclose(logFile);
+	auto vr = addr.getVRAM();
+	std::ofstream outputFile("C:\\Users\\marcu\\Downloads\\vramdump.txt", std::ios::binary);
+	outputFile.write(reinterpret_cast<const char*>(vr.data()), vr.size());
+	outputFile.close();
 	cpu.print_registers();
 }
 
