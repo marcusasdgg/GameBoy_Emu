@@ -112,7 +112,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>"C:\Users\marcu\Downloads\SFML-3.0.0\lib";</AdditionalLibraryDirectories>
-      <AdditionalDependencies> "sfml-graphics.lib";"sfml-window.lib" ;"sfml-system.lib";$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies> "sfml-graphics-d.lib";"sfml-window-d.lib" ;"sfml-audio-d.lib";"sfml-system-d.lib";$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -125,6 +125,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>"C:\Users\marcu\Downloads\SFML-3.0.0\include";</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -132,7 +133,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>"C:\Users\marcu\Downloads\SFML-3.0.0\lib";</AdditionalLibraryDirectories>
-      <AdditionalDependencies>"sfml-graphics.lib";"sfml-window.lib" ;"sfml-system.lib";$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"sfml-graphics.lib";"sfml-window.lib" ;"sfml-system.lib";"sfml-audio.lib";$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -140,16 +141,19 @@
     <ClInclude Include="APU.h" />
     <ClInclude Include="Clock.h" />
     <ClInclude Include="CPU.h" />
+    <ClInclude Include="CustomStream.h" />
     <ClInclude Include="FIFO.h" />
     <ClInclude Include="helpers.h" />
     <ClInclude Include="MBC.h" />
     <ClInclude Include="MBC1.h" />
     <ClInclude Include="MBC3.h" />
+    <ClInclude Include="MBCFACTORY.h" />
     <ClInclude Include="NOMBC.h" />
     <ClInclude Include="Pixel.h" />
     <ClInclude Include="PPU.h" />
     <ClInclude Include="PPU2.h" />
     <ClInclude Include="Sprite.h" />
+    <ClInclude Include="SquareChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
@@ -160,6 +164,7 @@
     <ClCompile Include="bitwise_logic.cpp" />
     <ClCompile Include="Clock.cpp" />
     <ClCompile Include="CPU.cpp" />
+    <ClCompile Include="CustomStream.cpp" />
     <ClCompile Include="FIFO.cpp" />
     <ClCompile Include="helpers.cpp" />
     <ClCompile Include="interrupts.cpp" />
@@ -169,12 +174,14 @@
     <ClCompile Include="MBC.cpp" />
     <ClCompile Include="MBC1.cpp" />
     <ClCompile Include="MBC3.cpp" />
+    <ClCompile Include="MBCFACTORY.cpp" />
     <ClCompile Include="miscl.cpp" />
     <ClCompile Include="NOMBC.cpp" />
     <ClCompile Include="PPU.cpp" />
     <ClCompile Include="PPU2.cpp" />
     <ClCompile Include="prefixed.cpp" />
     <ClCompile Include="Sprite.cpp" />
+    <ClCompile Include="SquareChannel.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="unprefixed.cpp" />
   </ItemGroup>

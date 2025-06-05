@@ -17,5 +17,7 @@ public:
 	Clock(double hz, AddressSpace& a);
 	void tick();
 	uint64_t get_cycle();
+	std::vector<uint8_t> saveBytes();
+	void loadSave(std::string savePath);
 };
 

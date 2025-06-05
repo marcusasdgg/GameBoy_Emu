@@ -3,6 +3,7 @@
 #include <chrono>
 #include<iostream>
 #include "helpers.h"
+#include <fstream>
 void Clock::tick(){
     uint16_t olddiv = divcounter;
     cycles++;
@@ -54,4 +55,38 @@ Clock::Clock(double hz, AddressSpace& a) : addr(a) {
 
 uint64_t Clock::get_cycle(){
     return cycles;
+}
+
+std::vector<uint8_t> Clock::saveBytes()
+{
+    auto butes = std::vector<uint8_t>();
+    butes.push_back(cycles >> 56);
+    butes.push_back(cycles >> 48);
+    butes.push_back(cycles >> 40);
+    butes.push_back(cycles >> 32);
+    butes.push_back(cycles >> 24);
+    butes.push_back(cycles >> 16);
+    butes.push_back(cycles >> 8);
+    butes.push_back(cycles);
+    butes.push_back(divcounter >> 8);
+    butes.push_back(divcounter);
+    return butes;
+}
+
+void Clock::loadSave(std::string savePath)
+{
+    std::ifstream inputFile(savePath, std::ios::binary);
+    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+        std::istreambuf_iterator<char>());
+    cycles =
+        (static_cast<uint64_t>(buffer[15]) << 56) |
+        (static_cast<uint64_t>(buffer[16]) << 48) |
+        (static_cast<uint64_t>(buffer[17]) << 40) |
+        (static_cast<uint64_t>(buffer[18]) << 32) |
+        (static_cast<uint64_t>(buffer[19]) << 24) |
+        (static_cast<uint64_t>(buffer[20]) << 16) |
+        (static_cast<uint64_t>(buffer[21]) << 8) |
+        static_cast<uint64_t>(buffer[22]);
+
+    divcounter = (buffer[23] << 8) | buffer[24];
 }

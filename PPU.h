@@ -35,8 +35,6 @@ class PPU {
 		int cycle_counter = 0;
 		PPUSTATE state = OAM;
 
-		int xpos = 0;
-
 
 		//reference to shared objects
 		Clock& clock;
@@ -111,12 +109,8 @@ class PPU {
 
 		std::array<uint8_t,16> get_tile(int index, bool indexingMethod);
 		
-
-		uint8_t BACKFIFO;
-		uint8_t SPRITEFIFO;
 		bool oamtriggerable = true;
 		bool vblank_triggerable = true;
-
 
 	public:
 		void resetBuffers();
@@ -126,6 +120,8 @@ class PPU {
 		PPU(AddressSpace& addressSpace, Clock& clock_l);
 		void step(uint8_t cycles);
 		void reset_cycle_counter();
+		std::vector<uint8_t> saveBytes();
+		void loadSave(std::string savePath);
 		void stop();
 		std::array<std::array<PIXEL,160>,144> getDisplay();
 };

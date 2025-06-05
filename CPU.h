@@ -294,6 +294,9 @@ class CPU{
 
 		void step();
 
+		std::vector<uint8_t> saveBytes();
+		void loadSave(std::string savePath);
+
 		void arithmetic_test();
 		uint16_t prefixedCodes(uint16_t program_counter);
 		uint16_t unprefixedCodes(uint16_t program_counter);

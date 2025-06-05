@@ -1,6 +1,6 @@
 #include "NOMBC.h"
 
-NOMBC::NOMBC(std::string a) : MBC(a){
+NOMBC::NOMBC(std::string a, std::string savePath) : MBC(a){
 
 }
 
@@ -16,4 +16,13 @@ void NOMBC::write(uint16_t address, uint8_t val)
 
 void NOMBC::incr(uint16_t address){
 	return;
+}
+
+std::vector<uint8_t> NOMBC::saveBytes()
+{
+	return MBC::saveBytes();
+}
+
+void NOMBC::loadSave(std::string savePath)
+{
 }

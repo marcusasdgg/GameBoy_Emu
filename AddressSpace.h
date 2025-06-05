@@ -5,6 +5,7 @@
 #include<vector>
 #include "MBC.h"
 #include <memory>
+#include "APU.h"
 
 #define testMode false
 #define debug false
@@ -23,22 +24,22 @@
 #define NR12 0xFF112
 #define NR13 0xFF13
 #define NR14 0xFF14
-#define NR21 0xFF21
-#define NR22 0xFF22
-#define NR23 0xFF23
-#define NR24 0xFF24
-#define NR30 0xFF30
-#define NR31 0xFF31
-#define NR32 0xFF32
-#define NR33 0xFF33
-#define NR34 0xFF34
-#define NR41 0xFF41
-#define NR42 0xFF42
-#define NR43 0xFF43
-#define NR44 0xFF44
-#define NR50 0xFF50
-#define NR51 0xFF51
-#define NR52 0xFF52
+#define NR21 0xFF16
+#define NR22 0xFF17
+#define NR23 0xFF18
+#define NR24 0xFF19
+#define NR30 0xFF1A
+#define NR31 0xFF1B
+#define NR32 0xFF1C
+#define NR33 0xFF1D
+#define NR34 0xFF1E
+#define NR41 0xFF20
+#define NR42 0xFF21
+#define NR43 0xFF22
+#define NR44 0xFF23
+#define NR50 0xFF24
+#define NR51 0xFF25
+#define NR52 0xFF26
 #define LCDC 0xFF40
 #define STAT 0xFF41
 #define SCY 0xFF42
@@ -82,7 +83,7 @@ public:
 	void readRom(std::string file_path);
 	void saveRom(std::string file_path);
 	void write(uint16_t address, uint8_t value, bool iscpu = true);
-	AddressSpace(std::string bootupPath, std::string romPath);
+	AddressSpace(std::string bootupPath, std::string romPath, std::string savePath = "");
 	void setCpuWriteable(bool);
 	std::array<uint8_t,160> getOAM();
 	std::array<uint8_t, 6144> getVRAM();
@@ -103,8 +104,13 @@ public:
 
 	
 	uint8_t getVRAMADD(uint16_t address);
+
+	std::vector<uint8_t> saveBytes();
+	void loadSave(std::string savePath);
+	void tickAPU(uint8_t cycles);
 private:
 	MBC* mbc;
+	APU apu;
 	std::array<uint8_t, 256> bootupRom;
 	std::array<bool, 8> buttonstate;
 	bool inStartup = true;

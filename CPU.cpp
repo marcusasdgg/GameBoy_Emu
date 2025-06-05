@@ -101,6 +101,54 @@ void CPU::step(){
 	interrupt_handler();
 }
 
+std::vector<uint8_t> CPU::saveBytes()
+{
+	auto saveFile = std::vector<uint8_t>();
+	saveFile.push_back(A);
+	saveFile.push_back(B);
+	saveFile.push_back(C);
+	saveFile.push_back(D);
+	saveFile.push_back(E);
+	saveFile.push_back(F);
+	saveFile.push_back(H);
+	saveFile.push_back(L);
+
+	saveFile.push_back(SP >> 8);
+	saveFile.push_back(SP);
+
+	saveFile.push_back(PC >> 8);
+	saveFile.push_back(PC);
+
+	saveFile.push_back(IME);
+	saveFile.push_back(halted);
+	saveFile.push_back(halt_bug);
+
+	return saveFile;
+
+}
+
+void CPU::loadSave(std::string savePath)
+{
+	std::ifstream inputFile(savePath, std::ios::binary);
+	std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+		std::istreambuf_iterator<char>());
+	A = buffer[0];
+	B = buffer[1];
+	C = buffer[2];
+	D = buffer[3];
+	E = buffer[4];
+	F = buffer[5];
+	H = buffer[6];
+	L = buffer[7];
+
+	SP = buffer[8] << 8 | buffer[9];
+	PC = buffer[10] << 8 | buffer[11];
+
+	IME = buffer[12];
+	halted = buffer[13];
+	halt_bug = buffer[14];
+}
+
 void CPU::advance_cycles(uint8_t cycles){
 	for (int i = 0; i < cycles; i++) {
 		clock.tick();
@@ -239,6 +287,7 @@ void CPU::interrupt_handler(){
 			advance_cycles(8);
 			switch (intr) {
 			case JOYPAD:
+				printf("joypad interrupt triggered\n");
 				PC = 0x60;
 				break;
 			case Serial:

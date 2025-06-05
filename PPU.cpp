@@ -1,6 +1,8 @@
 #include "PPU.h"
 #include "helpers.h"
-
+#include <algorithm>
+#include <iterator>
+#include <fstream>
 #define SCANLINE_CYCLES 339
 
 //issues : stat interrupts don't really work, i.e LYC == LY
@@ -310,9 +312,9 @@ void PPU::renderSprite() {
 
 void PPU::resetBuffers() {
 	scanline_buffer.fill(PIXEL::GREEN0);
-	for (int i = 0; i < 144; i++) {
-		framebuffer[i].fill(PIXEL::GREEN0);
-	}
+	//for (int i = 0; i < 144; i++) {
+	//	framebuffer[i].fill(PIXEL::GREEN0);
+	//}
 }
 
 uint8_t PPU::get_scanline()
@@ -339,9 +341,6 @@ std::array<uint8_t, 16> PPU::get_tile(int index, bool indexingMethod) {
 }
 
 PPU::PPU(AddressSpace& addressSpace, Clock& clock_l) : addr(addressSpace), clock(clock_l) {
-
-	BACKFIFO = 0;
-	SPRITEFIFO = 0;
 }
 
 void PPU::step(uint8_t cycles) {
@@ -446,6 +445,70 @@ void PPU::reset_cycle_counter() {
 	cycle_counter = 0;
 	state = OAM;
 }
+
+std::vector<uint8_t> PPU::saveBytes()
+{
+	std::vector<uint8_t> butes;
+	butes.push_back(static_cast<uint8_t>(state));
+
+	butes.push_back(cycle_counter >> 24);
+	butes.push_back(cycle_counter >> 16);
+	butes.push_back(cycle_counter >> 8);
+	butes.push_back(cycle_counter);
+
+	butes.push_back(windowLineCounter >> 24);
+	butes.push_back(windowLineCounter >> 16);
+	butes.push_back(windowLineCounter >> 8);
+	butes.push_back(windowLineCounter);
+
+	butes.push_back(static_cast<uint8_t>(oamtriggerable));
+	butes.push_back(static_cast<uint8_t>(vblank_triggerable));
+
+	// scanline_buffer: 160 PIXEL values -> cast if safe
+	for (auto px : scanline_buffer) {
+		butes.push_back(static_cast<uint8_t>(px));
+	}
+
+	// framebuffer: 144x160 PIXEL values
+	for (const auto& row : framebuffer) {
+		for (auto px : row) {
+			butes.push_back(static_cast<uint8_t>(px));
+		}
+	}
+
+	return butes;
+}
+
+
+void PPU::loadSave(std::string savePath)
+{
+	std::ifstream inputFile(savePath, std::ios::binary);
+	std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+		std::istreambuf_iterator<char>());
+
+	if (buffer.size() < 36 + 160 + 160 * 144) {
+		throw std::runtime_error("Save file too small for PPU state.");
+	}
+
+	state = static_cast<PPUSTATE>(buffer[25]);
+	cycle_counter = (buffer[26] << 24) | (buffer[27] << 16) | (buffer[28] << 8) | buffer[29];
+	windowLineCounter = (buffer[30] << 24) | (buffer[31] << 16) | (buffer[32] << 8) | buffer[33];
+	oamtriggerable = buffer[34];
+	vblank_triggerable = buffer[35];
+
+	// Scanline buffer: next 160 bytes
+	for (int i = 0; i < 160; i++) {
+		scanline_buffer[i] = static_cast<PIXEL>(buffer[36 + i]);
+	}
+
+	// Framebuffer: next 160 * 144 bytes
+	for (int i = 0; i < 160 * 144; i++) {
+		int x = i % 160;
+		int y = i / 160;
+		framebuffer[y][x] = static_cast<PIXEL>(buffer[36 + 160 + i]);
+	}
+}
+
 
 std::array<std::array<PIXEL, 160>, 144> PPU::getDisplay()
 {

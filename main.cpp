@@ -9,43 +9,40 @@
 #include <fstream>
 
 #include "helpers.h"
-#include "PPU2.h"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\Pokemon Blue.gb");
+#define SAVEPATH "C:\\Users\\marcu\\Downloads\\saveFiles\\poo.POOSAVE"
+
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
 Clock ck(4000000,addr);
+CPU cpu(addr, ck);
 PPU ppu(addr,ck);
 const int SCREEN_WIDTH = 160;
 const int SCREEN_HEIGHT = 144;
 FILE* logFile;
+sf::Color a[] = {sf::Color(181,175,66),sf::Color(145,155,58),sf::Color(93,120,46), sf::Color(58,81, 34) };
 
 
+int FACTOR = 2;
 
-#define FACTOR 10
+//changes to make: ppu can return a texture or inplace mod a texture isntead.
 
-// diagnose the cpu because it is broken and does not decomnpress data properly into vram
+// somethin about delayed movement?
 
-//IMPORATNT
-// for the cpu, make each jump instruction return a PC instead of editing pc direclty.
 
-// fix teh issue of:c
-// editing the PC when jumping.
-
-//reWRITE ENTIRE PROJECT, to USE A single thread that goes by fps timing and not 100% accurate cpu/ppu timings
-
-// could do something like: the jump inbstructions return a PC, check if PC is negative -1, if so return it back into the normal PC else don't change, also make these cases return immediately in their own cases as well.
-//00:C69D
-//current main
 int main() {
+	//cpu.loadSave(SAVEPATH);
+	//ck.loadSave(SAVEPATH);
+	//ppu.loadSave(SAVEPATH);
+	//addr.loadSave(SAVEPATH);
 
 	//up down left right a b select start
-	std::array<bool,8> buttonstate = { 0,0,0,0,0,0,0,0 };
-	
-	CPU cpu(addr, ck);
-	cpu.inititialise();
+	std::array<bool, 8> buttonstate = { 0,0,0,0,0,0,0,0 };
+
+	//cpu.inititialise();
 	int missedFrames = 0;
-	int fps = 60*FACTOR; // changes fps
-	uint64_t frequency = 4194304*FACTOR; //4194304; //changes frequency
-	
+	int fps = 60 * FACTOR; // changes fps
+	uint64_t frequency = 4194304 * FACTOR; //4194304; //changes frequency
+
 	uint64_t cycles_per_frame = frequency / fps;
 	auto target_frame_time = std::chrono::microseconds(1000000 / fps);
 
@@ -55,7 +52,7 @@ int main() {
 	//freopen_s(&logFile, "C:\\Users\\marcu\\Desktop\\log.txt", "w", stdout);
 
 	auto start = std::chrono::high_resolution_clock::now();
-	sf::RenderWindow window(sf::VideoMode(sf::Vector2u(160*4, 144*4)), "Game Boy Emulator");
+	sf::RenderWindow window(sf::VideoMode(sf::Vector2u(160 * 4, 144 * 4)), "Game Boy Emulator");
 
 	sf::Texture texture(sf::Vector2u(160, 144));
 
@@ -63,9 +60,9 @@ int main() {
 	sprite.scale(sf::Vector2f(4.0, 4.0));
 
 	// Optional: scale it up to make it more visible (Game Boy screen is tiny)
-	sf::Image frameImage(sf::Vector2u(160, 144)); 
+	sf::Image frameImage(sf::Vector2u(160, 144));
 
-	const int gradient[] = {0,255};
+	const int gradient[] = { 0,255 };
 
 
 	int frames = 0;
@@ -74,12 +71,88 @@ int main() {
 	while (window.isOpen()) {
 		auto frame_start = std::chrono::high_resolution_clock::now();
 		int cycles_frame = 0;
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
+		{
+			buttonstate[0] = true;
+		}
+		else {
+			buttonstate[0] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
+		{
+			buttonstate[1] = true;
+		}
+		else {
+			buttonstate[1] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
+		{
+			buttonstate[2] = true;
+		}
+		else {
+			buttonstate[2] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
+		{
+			buttonstate[3] = true;
+		}
+		else {
+			buttonstate[3] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C))
+		{
+			buttonstate[4] = true;
+		}
+		else {
+			buttonstate[4] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::V))
+		{
+			buttonstate[5] = true;
+		}
+		else {
+			buttonstate[5] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
+		{
+			buttonstate[6] = true;
+		}
+		else {
+			buttonstate[6] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X))
+		{
+			buttonstate[7] = true;
+		}
+		else {
+			buttonstate[7] = false;
+		}
+
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Q))
+		{
+			FACTOR = 20;
+		}
+		else {
+			FACTOR = 2;
+		}
+		addr.mapbuttons(buttonstate);
+
+
 		while (cycles_frame < cycles_per_frame) {
-		
+
 			auto curr_cycle = ck.get_cycle();
 			cpu.step();
-			int cycles_taken = (int) (ck.get_cycle() - curr_cycle);
+			int cycles_taken = (int)(ck.get_cycle() - curr_cycle);
 			ppu.step(cycles_taken);
+			addr.tickAPU(cycles_taken);
 			cycles_frame += cycles_taken;
 		}
 
@@ -92,105 +165,19 @@ int main() {
 		for (int y = 0; y < 144; ++y) {
 			for (int x = 0; x < 160; ++x) {
 				PIXEL val = display[y][x];
-				switch (val)
-				{
-				case GREEN0:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0xFF, 0xFF, 0xFF)); // Dark Green
-					break;
-				case GREEN1:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0xFF, 0,0)); // Medium Green
-					break;
-				case GREEN2:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0, 0xFF, 0)); // Light Green
-					break;
-				case GREEN3:
-					frameImage.setPixel(sf::Vector2u(x, y), sf::Color(0,0, 0xFF)); // Very Light Green
-					break;
-				default:
-					break;
-				}
+				frameImage.setPixel(sf::Vector2u(x, y), a[val]);
 			}
 		}
 
-		
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Up))
-		{
-			buttonstate[0] = true;
-			printf("up pressed\n");
-		}
-		else {
-			buttonstate[0] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Down))
-		{
-			buttonstate[1] = true;
-			printf("down pressed\n");
-		}
-		else {
-			buttonstate[1] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Left))
-		{
-			printf("left pressed\n");
-			buttonstate[2] = true;
-		}
-		else {
-			buttonstate[2] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Right))
-		{
-			printf("right pressed\n");
-			buttonstate[3] = true;
-		}
-		else {
-			buttonstate[3] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::C))
-		{
-			printf("A pressed\n");
-			buttonstate[4] = true;
-		}
-		else {
-			buttonstate[4] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::V))
-		{
-			printf("B pressed\n");
-			buttonstate[5] = true;
-		}
-		else {
-			buttonstate[5] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::Z))
-		{
-			printf("select pressed\n");
-			buttonstate[6] = true;
-		}
-		else {
-			buttonstate[6] = false;
-		}
-
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::X))
-		{
-			printf("start pressed\n");
-			buttonstate[7] = true;
-		}
-		else {
-			buttonstate[7] = false;
-		}
 
 
-		addr.mapbuttons(buttonstate);
+
+		fps = 60 * FACTOR;
+		target_frame_time = std::chrono::microseconds(1000000 / fps);
+
 
 		texture.update(frameImage);
-		window.clear();
+		//window.clear();
 		window.draw(sprite);
 		window.display();
 
@@ -204,11 +191,11 @@ int main() {
 
 		if (sleep_til < std::chrono::high_resolution_clock::now()) {
 			missedFrames++;
-			printf("exceeded frame time\n");
+			//printf("exceeded frame time\n");
 		}
-			
 
-		while (sleep_til > std::chrono::high_resolution_clock::now()) {		
+
+		while (sleep_til > std::chrono::high_resolution_clock::now()) {
 			const std::optional event = window.pollEvent();
 			if (event.has_value() && event->is<sf::Event::Closed>()) {
 				window.close();
@@ -224,35 +211,34 @@ int main() {
 
 	auto now = std::chrono::high_resolution_clock::now();
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
-	printf("missed %d frames", missedFrames);
-	//fclose(logFile);
-	auto vr = addr.getVRAM();
-	std::ofstream outputFile("C:\\Users\\marcu\\Downloads\\vramdump.txt", std::ios::binary);
-	outputFile.write(reinterpret_cast<const char*>(vr.data()), vr.size());
+	printf("In %lld cycles missed %d frames\n", ck.get_cycle(), missedFrames);
+
+	std::vector<uint8_t> cpubytes = cpu.saveBytes();
+	printf("clock bytes starts at index %lld\n", cpubytes.size());
+	std::vector<uint8_t> clockbytes = ck.saveBytes();
+	printf("ppu bytes starts at index %lld\n", clockbytes.size() + cpubytes.size());
+	std::vector<uint8_t> ppuBytes = ppu.saveBytes();
+	printf("addr bytes starts at index %lld\n", ppuBytes.size() + cpubytes.size() + clockbytes.size());
+	std::vector<uint8_t> addrbytes = addr.saveBytes();
+
+	printf("saving %lld bytes", cpubytes.size() + clockbytes.size() + ppuBytes.size() + addrbytes.size());
+	// NOW COMBINE AND SAVE
+	std::ofstream outputFile(SAVEPATH, std::ios::binary);
+	outputFile.write(reinterpret_cast<const char*>(cpubytes.data()), cpubytes.size());
+	outputFile.write(reinterpret_cast<const char*>(clockbytes.data()), clockbytes.size());
+	outputFile.write(reinterpret_cast<const char*>(ppuBytes.data()), ppuBytes.size());
+	outputFile.write(reinterpret_cast<const char*>(addrbytes.data()), addrbytes.size());
 	outputFile.close();
+	//fclose(logFile);
 	cpu.print_registers();
 }
 
 
-//void DecompressAndCopy(uint8_t data, uint16_t addrs) {
-//	uint8_t mask0 = 0b00000001;
-//	uint8_t mask1 = 0b00000011;
-//	uint8_t res = 0;
-//	for (int i = 0; i < 4; ++i) {
-//		res |= (data & mask0) ? mask1 : 0;
-//		mask0 <<= 1;
-//		mask1 <<= 2;
-//	}
-//	addr.write(addrs, res);
-//	addr.write(addrs + 2, res);
-//}
-//
-//
+//each save file contains cpu register values, PC SP etc then clock info then ppu info then address space info which in itself contains mbc info.
+
 //int main() {
-//	uint16_t vram = 0x8010;
-//
-//	sf::RenderWindow window(sf::VideoMode(sf::Vector2u(160*4, 144*4)), "Game Boy Emulator");
-//
+//		sf::RenderWindow window(sf::VideoMode(sf::Vector2u(160*4, 144*4)), "Game Boy Emulator");
+//	ppu.loadSave("C:\\Users\\marcu\\Downloads\\poo.POOSAVE");
 //	sf::Texture texture(sf::Vector2u(160, 144));
 //
 //	sf::Sprite sprite(texture);
@@ -260,71 +246,17 @@ int main() {
 //
 //	// Optional: scale it up to make it more visible (Game Boy screen is tiny)
 //	sf::Image frameImage(sf::Vector2u(160, 144)); 
-//
-//	addr.write(BGP, 0xFC);
-//
-//
-//	for (uint16_t logo = 0x0104; logo < 0x0134; logo++) {
-//		uint8_t data = addr.read(logo);
-//		DecompressAndCopy(data, vram);
-//		vram += 4;
-//		DecompressAndCopy(data >> 4, vram);
-//		vram += 4;
-//	}
-//
-//	vram = 0x80d0;
-//	for (uint16_t logo = 0xd8; logo < 0xe0; ++logo) {
-//		addr.write(vram, addr.read(logo));
-//		vram += 2;
-//	}
-//
-//	int a = 25;
-//	uint16_t mem = 0x9910;
-//	addr.write(mem, a);
-//	mem = 0x992f;
-//	for (int j = 0; j < 2; ++j) {
-//		for (int i = 12; i > 0; --i) {
-//			a--;
-//			addr.write(mem, a);
-//			mem--;
-//		}
-//		mem = 0x990f;
-//	}
-//
-//
-//	addr.write(SCY,0x48);
-//	addr.write(LCDC, 0x91);
-//
-//
-//	ppu.read_lcdc();
-//	auto memory = addr.getVRAM();
+//			auto display = ppu.getDisplay();
 //	
-//
-//	for (int i = 0; i < 144; i++) {
-//		ppu.renderScanline(i);
-//		addr.incr(LY);
-//	}
-//
-//	auto display = ppu.getDisplay();
-//
 //	for (int y = 0; y < 144; ++y) {
 //		for (int x = 0; x < 160; ++x) {
 //			PIXEL val = display[y][x];
-//			if (val != PIXEL::GREEN0) {
-//				printf("found non 0 pixel!!\n");
-//			}
-//			frameImage.setPixel(sf::Vector2u(x, y), sf::Color(val *255, val * 255, val * 255)); // grayscale
+//			frameImage.setPixel(sf::Vector2u(x, y), a[val]);
 //		}
 //	}
-//
-//	texture.update(frameImage);
-//	window.clear();
-//	window.draw(sprite);
-//	window.display();
-//
-//	
-//
-
-//
+//			texture.update(frameImage);
+//		//window.clear();
+//		window.draw(sprite);
+//		window.display();
 //	std::this_thread::sleep_for(std::chrono::seconds(5));
 //}

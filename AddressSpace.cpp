@@ -6,6 +6,8 @@
 #include "MBC3.h"
 #include "MBC.h"
 #include "NOMBC.h"
+#include "MBCFACTORY.h"
+#include <iterator>
 
 static void print_binary(uint8_t n) {
     unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
@@ -30,7 +32,7 @@ static void print_binary(uint8_t n) {
 //make accessing hardware registers easier with an alternate function for some, i.e
 //ppu uses 
 
-AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
+AddressSpace::AddressSpace(std::string bootPath, std::string romPath, std::string savePath) {
 	std::fill(memory, memory + SIZE, 0);
     std::ifstream inputFile(bootPath, std::ios::binary);
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
@@ -39,7 +41,7 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath) {
     //loadRom(romPath);
     if (testMode)
         memory[LY] = 0x90;
-    mbc = new MBC3(romPath);
+    mbc = MBCFACTORY::createMBC(romPath,savePath);
 }
 
 void AddressSpace::setCpuWriteable(bool cond){
@@ -118,10 +120,37 @@ uint8_t AddressSpace::getVRAMADD(uint16_t address)
     return memory[address];
 }
 
+std::vector<uint8_t> AddressSpace::saveBytes()
+{
+    auto saveFile = std::vector<uint8_t>();
+    printf("saved startup value as %d\n", inStartup);
+    saveFile.push_back(inStartup);
+    saveFile.insert(saveFile.end(), memory, memory + 65536);
+    auto mbcfile = mbc->saveBytes();
+    saveFile.insert(saveFile.end(), mbcfile.begin(), mbcfile.end());
+    return saveFile;
+}
+
+void AddressSpace::loadSave(std::string savePath)
+{
+    std::ifstream inputFile(savePath, std::ios::binary);
+    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
+        std::istreambuf_iterator<char>());
+    inStartup = buffer[23396];
+    printf("loaded startup value as %d\n", inStartup);
+    std::copy(&buffer[23237], &buffer[(uint32_t)23397 + 0xFFFF], &memory[0]);
+
+}
+
+void AddressSpace::tickAPU(uint8_t cycles)
+{
+    for (auto i = 0 ; i < cycles ; i++)
+        apu.tick(cycles);
+}
+
 uint8_t AddressSpace::read(uint16_t address) {
 
-    
-
+    // joypad registers
     if (address == 0xFF00) {
         uint8_t joyp = memory[address];
         uint8_t slcbutt = get_bit(joyp, 5);
@@ -152,12 +181,19 @@ uint8_t AddressSpace::read(uint16_t address) {
     }
 
 
+    //bootup sequence address
     if (inStartup && address < 256) {
         return bootupRom[address];
     } 
 
-    if (address < 0x7FFF) {
+    // mbc / rom addresses
+    if (address <= 0x7FFF ||(address >= 0xA000 && address <= 0xBFFF)) {
         return mbc->read(address);
+    }
+
+    // APU registers
+    if (address >= 0xFF10 && address <= 0xFF26) {
+        return apu.read(address);
     }
 
     return memory[address];
@@ -203,10 +239,12 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     }
 
     //mbc address
-    if (address <= 0x7FFF) {
+    if (address <= 0x7FFF || (address >= 0xA000 && address <= 0xBFFF)) {
         mbc->write(address,value);
         return;
     }
+
+
 
     if (address == 0xFF00) {
         uint8_t dpad = get_bit(value, 4);
@@ -217,12 +255,12 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         memory[0xFF00] = byt;
     }
 
-    //if (isCPU && !cpuWriteable) {
-    //    if (address >= 0xFE00 && address <= 0xFE9F) {
-    //        //printf("blocked oam write\n");
-    //        return;
-    //    }
-    //}
+    if (isCPU && !cpuWriteable) {
+        if (address >= 0xFE00 && address <= 0xFE9F) {
+            return;
+        }
+    }
+
     if (address == 0xFF50 && value != 0) {
         if (debug) {
             printf("disabled bootup rom\n");
@@ -231,12 +269,16 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         inStartup = false;
     }
 
+    if (address >= 0xFF10 && address <= 0xFF26) {
+        apu.write(address, value);
+    }
+
     if (address == 0xFF46) {
-        //oam dma
-       // printf("oam dma triggered\n");
         uint16_t start_add = (uint16_t)value * 0x100;
         auto range = get_range(start_add, start_add + 160);
         std::copy(range.begin(), range.end(), &memory[0xFE00]);
+        return;
     }
+
     memory[address] = value;
 }
