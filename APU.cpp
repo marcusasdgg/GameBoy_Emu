@@ -30,6 +30,8 @@ void APU::clockLengthCounters()
 
 	channel2.lengthclck();
 
+	channel3.lengthclck();
+
 	//if (!disable3 && timer3 > 0) {
 	//	timer3--;
 	//	if (timer3 == 0)
@@ -43,7 +45,7 @@ void APU::clockLengthCounters()
 	//}
 }
 
-APU::APU()
+APU::APU(std::array<uint8_t, 0x10000>& fatBerg) : channel3(fatBerg)
 {
 	stream.start();
 	stream.play();
@@ -77,11 +79,15 @@ uint8_t APU::read(uint16_t address)
 
 		//channel 3: wave
 	case NR30:
+		return channel3.getDacEnable();
 	case NR31:
+		return channel3.getLengthTimer();
 	case NR32:
+		return channel3.getOutputLevel();
 	case NR33:
+		return channel3.getPeriodLow();
 	case NR34:
-		return 0xFF;
+		return channel3.getPeriodHighControl();
 
 		//channel 4: noise
 	case NR41:
@@ -139,11 +145,15 @@ void APU::write(uint16_t address, uint8_t data)
 		
 		//channel 3: wave todo! later
 		case NR30:
+			return channel3.setDacEnable(data);
 		case NR31:
+			return channel3.setLengthTimer(data);
 		case NR32:
+			return channel3.setOutputLevel(data);
 		case NR33:
+			return channel3.setPeriodLow(data);
 		case NR34:
-			return;
+			return channel3.setPeriodHighControl(data);
 
 		//channel 4: noise todo! later
 		case NR41:
@@ -182,7 +192,7 @@ void APU::tick(uint8_t cycles)
 
 	channel1.step(1);
 	channel2.step(1);
-
+	channel3.step();
 	//stepChannel3();
 	//stepChannel4();
 
@@ -191,11 +201,13 @@ void APU::tick(uint8_t cycles)
 		// this is 1 sample of 44.1khz
 		int16_t sample1 = channel1.getVolume();
 		int16_t sample2 = channel2.getVolume();
-		int mixed = sample1 + sample2;
+		int16_t sample3 = channel3.getVolume();
+
+		int mixed = sample1 + sample2 + sample3;
 
 		if (mixed > 32767) mixed = 32767;
 		if (mixed < -32768) mixed = -32768;
-		stream.addSample((int16_t)mixed);
+		stream.addSample((int16_t)sample3);
 	}
 
 }

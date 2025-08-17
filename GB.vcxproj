@@ -154,6 +154,7 @@
     <ClInclude Include="PPU2.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="SquareChannel.h" />
+    <ClInclude Include="WaveChannel.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AddressSpace.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="SquareChannel.cpp" />
     <ClCompile Include="stack.cpp" />
     <ClCompile Include="unprefixed.cpp" />
+    <ClCompile Include="WaveChannel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\..\Downloads\SFML-3.0.0\bin\sfml-graphics-3.dll" />

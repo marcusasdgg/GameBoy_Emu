@@ -9,6 +9,8 @@
 #include "MBCFACTORY.h"
 #include <iterator>
 
+// todo! create different regions so that 640000 byte array is not needed.
+
 static void print_binary(uint8_t n) {
     unsigned int mask = 1 << (sizeof(n) * 8 - 1);  // Mask to start from the most significant bit
 
@@ -32,15 +34,12 @@ static void print_binary(uint8_t n) {
 //make accessing hardware registers easier with an alternate function for some, i.e
 //ppu uses 
 
-AddressSpace::AddressSpace(std::string bootPath, std::string romPath, std::string savePath) {
-	std::fill(memory, memory + SIZE, 0);
+AddressSpace::AddressSpace(std::string bootPath, std::string romPath, std::string savePath) : apu(wram) {
     std::ifstream inputFile(bootPath, std::ios::binary);
     std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
         std::istreambuf_iterator<char>());
     std::copy(buffer.begin(), buffer.end(),bootupRom.begin());
-    //loadRom(romPath);
-    if (testMode)
-        memory[LY] = 0x90;
+ 
     mbc = MBCFACTORY::createMBC(romPath,savePath);
 }
 
@@ -49,26 +48,16 @@ void AddressSpace::setCpuWriteable(bool cond){
 }
 
 
-std::array<uint8_t,160> AddressSpace::getOAM(){
-    std::array<uint8_t, 160> spriteData;
-    std::copy(memory + 0xFE00, memory + 0xFE9F + 1, spriteData.begin());
-    return spriteData;
-}
 
-std::array<uint8_t, 6144> AddressSpace::getVRAM()
-{
-    std::array<uint8_t, 6144> vram;
-    std::copy(memory + 0x8000, memory + 0x97FF + 1, vram.begin());
-    return vram;
-}
+
 
 void AddressSpace::incr(uint16_t add){
-    //TODO remove!!
     if (add < 0x7FFF) {
         mbc->incr(add);
         return;
     }
-    memory[add] += 1;
+    if (add == LY)
+        incrLY();
 }
 
 std::vector<uint8_t> AddressSpace::get_range(uint16_t start, uint16_t end){
@@ -81,9 +70,9 @@ void AddressSpace::mapbuttons(std::array<bool,8>& state){
     if (state[0] != buttonstate[0] || state[1] != buttonstate[1] 
         || state[2] != buttonstate[2] || state[3] != buttonstate[3] || state[4] != buttonstate[4]
         || state[5] != buttonstate[5] || state[6] != buttonstate[6] || state[7] != buttonstate[7]) {
-        uint8_t iff = memory[IF];
+        uint8_t iff = ifr;
         printf("requesting interrupt\n");
-        memory[IF] = set_bit(iff, 4, true);
+        ifr = set_bit(iff, 4, true);
     }
 
     std::copy(state.begin(), state.end(), buttonstate.begin());
@@ -95,19 +84,19 @@ AddressSpace::~AddressSpace()
 }
 
 void AddressSpace::writeSTAT(uint8_t stat){
-    memory[STAT] = stat;
+    this->stat = stat;
 }
 
 
 
 void AddressSpace::incrLY()
 {
-    memory[LY] += 1;
+    ly++;
 }
 
 void AddressSpace::setIF(uint8_t iff)
 {
-    memory[IF] = iff;
+    ifr = iff;
 }
 
 void AddressSpace::setSTAT(uint8_t stat)
@@ -125,7 +114,7 @@ std::vector<uint8_t> AddressSpace::saveBytes()
     auto saveFile = std::vector<uint8_t>();
     printf("saved startup value as %d\n", inStartup);
     saveFile.push_back(inStartup);
-    saveFile.insert(saveFile.end(), memory, memory + 65536);
+    saveFile.insert(saveFile.end(),memory.begin(), memory.end());
     auto mbcfile = mbc->saveBytes();
     saveFile.insert(saveFile.end(), mbcfile.begin(), mbcfile.end());
     return saveFile;
@@ -207,30 +196,11 @@ void AddressSpace::loadRom(std::string file_path){
         printf("too big needs to be under %lld bytes but is %d bytes\n",SIZE,buffer.size());
         return;
     }
-    std::copy(buffer.begin(), buffer.end(), memory);
+    std::copy(buffer.begin(), buffer.end(), memory.begin());
     inputFile.close();
 }
 
 
-
-void AddressSpace::readRom(std::string file_path) {
-    std::ifstream inputFile(file_path, std::ios::binary);
-    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
-        std::istreambuf_iterator<char>());
-    if (buffer.size() > SIZE) {
-        printf("too big");
-        return;
-    }
-    std::copy(buffer.begin(), buffer.end(), memory);
-    inputFile.close();
-}
-
-void AddressSpace::saveRom(std::string file_path) {
-    std::ofstream outputFile(file_path, std::ios::binary);
-    outputFile.write(reinterpret_cast<const char*>(memory), SIZE);
-    printf("saving");
-    outputFile.close();
-}
 
 void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     //TODO remove!!
@@ -273,6 +243,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         apu.write(address, value);
     }
 
+    //some dma stuff
     if (address == 0xFF46) {
         uint16_t start_add = (uint16_t)value * 0x100;
         auto range = get_range(start_add, start_add + 160);

@@ -1,6 +1,6 @@
 #include "SquareChannel.h"
 #include "helpers.h"
-
+#include <random>
 SquareChannel::SquareChannel()
 {
 	//initialise all values or don't?
@@ -36,9 +36,9 @@ void SquareChannel::step(uint8_t cycles) {
 	if (enabled) {
 		frequencyTimer -= cycles;
 		if (frequencyTimer <= 0) {
-			sequencePointer = (sequencePointer + 1) & 0x7;
-			Volume = (dutyTable[waveduty][sequencePointer] * 2 - 1) * 4000;
+			Volume = (dutyTable[waveduty][sequencePointer] * 2 - 1) *2000 ;
 			frequencyTimer = (2048 - frequency) * 4 + frequencyTimer;
+			sequencePointer = (sequencePointer + 1) & 0x7;
 		}
 	}
 }

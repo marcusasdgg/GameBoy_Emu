@@ -66,6 +66,9 @@
     <ClInclude Include="CustomStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="WaveChannel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPU.cpp">
@@ -150,6 +153,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CustomStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WaveChannel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

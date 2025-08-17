@@ -71,6 +71,8 @@
 #define IE 0xFFFF
 
 
+//TODO : fix all functions in address space to resolve from old memory system (64 byte array) to compartementalised.
+// TODO: for performance purposes get the non user controlled parts of the cpu and ppu to read address using specialised functions.
 
 const int SIZE = 0x10000;
 
@@ -111,10 +113,71 @@ public:
 private:
 	MBC* mbc;
 	APU apu;
-	std::array<uint8_t, 256> bootupRom;
 	std::array<bool, 8> buttonstate;
+	std::array<uint8_t, 256> bootupRom;
+	std::array<uint8_t, 8192> vram;
+	std::array<uint8_t, 4096> fixedRam;
+	std::array<uint8_t, 4096> switchableRam;
+	std::array<uint8_t, 160> oam;
+	std::array<uint8_t, 16> wram;
+	
+	//lcd/graphic registers
+	uint8_t lcdc;
+	uint8_t stat;
+	uint8_t scx;
+	uint8_t scy;
+	uint8_t ly;
+	uint8_t lyc;
+	uint8_t dma;
+	uint8_t bgp;
+	uint8_t obp0;
+	uint8_t obp1;
+	uint8_t wy;
+	uint8_t wx;
+
+	// sound registers
+	uint8_t nr11;
+	uint8_t nr12;
+	uint8_t nr13;
+	uint8_t nr14;
+	uint8_t nr21;
+	uint8_t nr22;
+	uint8_t nr23;
+	uint8_t nr24;
+	uint8_t nr30;
+	uint8_t nr31;
+	uint8_t nr32;
+	uint8_t nr33;
+	uint8_t nr34;
+	uint8_t nr41;
+	uint8_t nr42;
+	uint8_t nr43;
+	uint8_t nr44;
+	uint8_t nr50;
+	uint8_t nr51;
+	uint8_t nr52;
+	
+	//interrupt register
+	uint8_t ifr;
+	uint8_t ie;
+
+	//serial stuff
+	uint8_t sb;
+	uint8_t sc;
+
+	//timer registers
+	uint8_t div;
+	uint8_t tima;
+	uint8_t tma;
+	uint8_t tac;
+
+	//joypad register
+	uint8_t joyp;
+
+	
+	//unincluded vram DMA registers, BG/OBJ p[allettes, WRAM bank select (mainly just CGB stufF).
+
 	bool inStartup = true;
-	uint8_t memory[SIZE];
 	bool cpuWriteable = false;
 };
 
