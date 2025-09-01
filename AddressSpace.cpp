@@ -60,11 +60,7 @@ void AddressSpace::incr(uint16_t add){
         incrLY();
 }
 
-std::vector<uint8_t> AddressSpace::get_range(uint16_t start, uint16_t end){
-    auto ve = std::vector<uint8_t>(end - start + 1);
-    std::copy(&memory[start], &memory[end + 1], ve.begin());
-    return ve;
-}
+
 
 void AddressSpace::mapbuttons(std::array<bool,8>& state){
     if (state[0] != buttonstate[0] || state[1] != buttonstate[1] 
@@ -101,24 +97,10 @@ void AddressSpace::setIF(uint8_t iff)
 
 void AddressSpace::setSTAT(uint8_t stat)
 {
-    memory[STAT] = stat;
+    this->stat = stat;
 }
 
-uint8_t AddressSpace::getVRAMADD(uint16_t address)
-{
-    return memory[address];
-}
 
-std::vector<uint8_t> AddressSpace::saveBytes()
-{
-    auto saveFile = std::vector<uint8_t>();
-    printf("saved startup value as %d\n", inStartup);
-    saveFile.push_back(inStartup);
-    saveFile.insert(saveFile.end(),memory.begin(), memory.end());
-    auto mbcfile = mbc->saveBytes();
-    saveFile.insert(saveFile.end(), mbcfile.begin(), mbcfile.end());
-    return saveFile;
-}
 
 void AddressSpace::loadSave(std::string savePath)
 {
@@ -138,10 +120,49 @@ void AddressSpace::tickAPU(uint8_t cycles)
 }
 
 uint8_t AddressSpace::read(uint16_t address) {
+    // check rom bank 0
+
+
+    //bootup sequence address
+    if (inStartup && address < 256) {
+        return bootupRom[address];
+    }
+
+
+    if (address <= 0x7FFF) {
+        return mbc->read(address);
+    }
+
+    if (address >= 0x8000 && address <= 0x9FFF) {
+        return vram[address - 0x8000];
+    }
+
+    if (address >= 0xA000 && address <= 0xBFFF) {
+        return mbc->read(address);
+    }
+
+    if (address >= 0xC000 && address <= 0xCFFF) {
+        return fixedRam[address - 0xC000];
+    }
+
+    if (address >= 0xD000 && address <= 0xDFFF) {
+        return wram[address - 0xD000];
+    }
+
+
+    // blah blah echoram
+        
+    if (address >= 0xFE00 && address <= 0xFE9F) {
+        return oam[address - 0xFE00];
+    }
+
+    if (address >= 0xFF80 && address <= 0xFFFE) {
+        return hram[address - 0xFF80];
+    }
 
     // joypad registers
     if (address == 0xFF00) {
-        uint8_t joyp = memory[address];
+        uint8_t joyp = this->joyp;
         uint8_t slcbutt = get_bit(joyp, 5);
         uint8_t slcdpad = get_bit(joyp, 4);
 
@@ -169,23 +190,63 @@ uint8_t AddressSpace::read(uint16_t address) {
         return complete;
     }
 
-
-    //bootup sequence address
-    if (inStartup && address < 256) {
-        return bootupRom[address];
-    } 
-
-    // mbc / rom addresses
-    if (address <= 0x7FFF ||(address >= 0xA000 && address <= 0xBFFF)) {
-        return mbc->read(address);
-    }
-
     // APU registers
     if (address >= 0xFF10 && address <= 0xFF26) {
         return apu.read(address);
     }
 
-    return memory[address];
+        
+
+    switch (address)
+    {
+	case 0xff01:
+		return sb;
+	case 0xff02:
+		return sc;
+	case 0xff04:
+		return div;
+	case 0xff05:
+		return tima;
+	case 0xff06:
+		return tma;
+	case 0xff07:
+		return tac;
+	case 0xff0f:
+		return ifr;
+	case 0xff40:
+		return lcdc;
+	case 0xff41:
+		return stat;
+	case 0xff42:
+		return scx;
+	case 0xff43:
+		return scy;
+	case 0xff44:
+		return ly;
+	case 0xff45:
+		return lyc;
+	case 0xff46:
+		return dma;
+	case 0xff47:
+		return bgp;
+	case 0xff48:
+		return obp0;
+	case 0xff49:
+		return obp1;
+	case 0xff4a:
+		return wy;
+	case 0xff4b:
+		return wx;
+	case 0xffff:
+        return ie;
+    default:
+        break;
+    }
+
+
+
+
+    return 0xFF;
 }
 
 void AddressSpace::loadRom(std::string file_path){
@@ -203,7 +264,6 @@ void AddressSpace::loadRom(std::string file_path){
 
 
 void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
-    //TODO remove!!
     if (testMode && address == LY) {
         return;
     }
@@ -216,19 +276,29 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
 
 
 
-    if (address == 0xFF00) {
+    if (address == P1JOYP) {
         uint8_t dpad = get_bit(value, 4);
         uint8_t sel = get_bit(value, 5);
-        uint8_t byt = memory[0xFF00];
+        uint8_t byt = joyp;
         byt = set_bit(byt,4,dpad);
         byt = set_bit(byt,5, sel);
-        memory[0xFF00] = byt;
-    }
+        joyp = byt;
+    } 
 
     if (isCPU && !cpuWriteable) {
         if (address >= 0xFE00 && address <= 0xFE9F) {
             return;
         }
+    }
+
+    // wrambank 0
+    if (address >= 0xC000 && address <= 0xCFFF) {
+        fixedRam[address - 0xC000] = value;
+    }
+        
+    // wrambank 1
+    if (address >= 0xD000 && address <= 0xDFFF) {
+        wram[address - 0xD000] = value;
     }
 
     if (address == 0xFF50 && value != 0) {
@@ -243,9 +313,86 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         apu.write(address, value);
     }
 
+    switch (address)
+    {
+    case 0xff01:
+        sb = value;
+        return;
+    case 0xff02:
+        sc = value;
+        return;
+    case 0xff04:
+        div = value;
+        return;
+    case 0xff05:
+        tima = value;
+        return;
+    case 0xff06:
+        tma = value;
+        return;
+    case 0xff07:
+        tac = value;
+        return;
+    case 0xff0f:
+        ifr = value;
+        return;
+    case 0xff40:
+        lcdc = value;
+        return;
+    case 0xff41:
+        stat = value;
+        return;
+    case 0xff42:
+        scx = value;
+        return;
+    case 0xff43:
+        scy = value;
+        return;
+    case 0xff44:
+        ly = value;
+        return;
+    case 0xff45:
+        lyc = value;
+        return;
+    case 0xff46:
+        dma = value;
+        return;
+    case 0xff47:
+        bgp = value;
+        return;
+    case 0xff48:
+        obp0 = value;
+        return;
+    case 0xff49:
+        obp1 = value;
+        return;
+    case 0xff4a:
+        wy = value;
+        return;
+    case 0xff4b:
+        wx = value;
+        return;
+    case 0xffff:
+        ie = value;
+        return;
+    default:
+        break;
+    }
+
+
+
+
     //some dma stuff
+    // find some other way to do dma instead of using memroy
     if (address == 0xFF46) {
+        //use to copy 160 bytes from given address to oam
         uint16_t start_add = (uint16_t)value * 0x100;
+
+        // determine if this address belongs in rom/eram/ram/wram
+
+        if (value )
+
+            
         auto range = get_range(start_add, start_add + 160);
         std::copy(range.begin(), range.end(), &memory[0xFE00]);
         return;

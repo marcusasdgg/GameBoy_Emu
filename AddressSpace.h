@@ -92,8 +92,6 @@ public:
 	void incr(uint16_t add);
 	
 
-	std::vector<uint8_t> get_range(uint16_t start, uint16_t end);
-
 	void mapbuttons(std::array<bool, 8>& state);
 	~AddressSpace();
 
@@ -104,10 +102,7 @@ public:
 	void setIF(uint8_t iff);
 	void setSTAT(uint8_t stat);
 
-	
-	uint8_t getVRAMADD(uint16_t address);
 
-	std::vector<uint8_t> saveBytes();
 	void loadSave(std::string savePath);
 	void tickAPU(uint8_t cycles);
 private:
@@ -120,6 +115,7 @@ private:
 	std::array<uint8_t, 4096> switchableRam;
 	std::array<uint8_t, 160> oam;
 	std::array<uint8_t, 16> wram;
+	std::array<uint8_t, 126> hram;
 	
 	//lcd/graphic registers
 	uint8_t lcdc;
@@ -136,6 +132,7 @@ private:
 	uint8_t wx;
 
 	// sound registers
+	uint8_t nr10;
 	uint8_t nr11;
 	uint8_t nr12;
 	uint8_t nr13;
