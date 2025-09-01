@@ -45,7 +45,7 @@ void APU::clockLengthCounters()
 	//}
 }
 
-APU::APU(std::array<uint8_t, 0x10000>& fatBerg) : channel3(fatBerg)
+APU::APU(std::array<uint8_t, 16>& fatBerg) : channel3(fatBerg)
 {
 	stream.start();
 	stream.play();

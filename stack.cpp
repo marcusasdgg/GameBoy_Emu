@@ -11,13 +11,16 @@ void CPU::popaf() {
 }
 
 void CPU::popr16(registerCalls a){
-	uint16_t byte1 = address_space.read(SP);
+	uint16_t temp = SP;
+	uint8_t byte1 = address_space.read(SP);
 	SP++;
 	uint8_t byte2 = address_space.read(SP);
 	SP++;
 	uint16_t imm16 = (byte2 << 8) | byte1;
-	if (debug)
-		printf("pop %s popped val: %s\n", to_string(a),to_string(imm16));
+	if (debug) {
+		printf("pop %s popped val: %s\n", to_string(a), to_string(imm16));
+	}
+		
 	store_in_register(a, imm16);
 }
 
@@ -61,8 +64,10 @@ void CPU::pushn16(uint16_t val, bool print){
 
 void CPU::pushr16(registerCalls a) {
 	uint16_t v = retrieve_register_16(a);
-	if (debug)
-		printf("push %s pushed val: %s\n", to_string(a),to_string(v));
+	if (debug) {
+		printf("push %s pushed val: %s\n", to_string(a), to_string(v));
+	}
+		
 	uint16_t bytes = v;
 	uint8_t high = bytes >> 8;
 	uint8_t low = bytes;
@@ -70,4 +75,7 @@ void CPU::pushr16(registerCalls a) {
 	address_space.write(SP,high);
 	SP--;
 	address_space.write(SP,low);
+	if (debug) {
+		printf("to %s\n", to_string(SP));
+	}
 }

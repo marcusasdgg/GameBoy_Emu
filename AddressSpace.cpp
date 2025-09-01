@@ -102,15 +102,64 @@ void AddressSpace::setSTAT(uint8_t stat)
 
 
 
-void AddressSpace::loadSave(std::string savePath)
-{
-    std::ifstream inputFile(savePath, std::ios::binary);
-    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
-        std::istreambuf_iterator<char>());
-    inStartup = buffer[23396];
-    printf("loaded startup value as %d\n", inStartup);
-    std::copy(&buffer[23237], &buffer[(uint32_t)23397 + 0xFFFF], &memory[0]);
 
+uint8_t AddressSpace::getVRAMADD(uint16_t address)
+{
+    if (address >= 0xFE00 && address <= 0xFE9F) {
+        return oam[address - 0xFE00];
+    }
+
+    if (address >= 0x8000 && address <= 0x9FFF) {
+        return vram[address - 0x8000];
+    }
+
+    switch (address)
+    {
+    case 0xff01:
+        return sb;
+    case 0xff02:
+        return sc;
+    case 0xff04:
+        return div;
+    case 0xff05:
+        return tima;
+    case 0xff06:
+        return tma;
+    case 0xff07:
+        return tac;
+    case 0xff0f:
+        return ifr;
+    case 0xff40:
+        return lcdc;
+    case 0xff41:
+        return stat;
+    case 0xff42:
+        return scx;
+    case 0xff43:
+        return scy;
+    case 0xff44:
+        return ly;
+    case 0xff45:
+        return lyc;
+    case 0xff46:
+        return dma;
+    case 0xff47:
+        return bgp;
+    case 0xff48:
+        return obp0;
+    case 0xff49:
+        return obp1;
+    case 0xff4a:
+        return wy;
+    case 0xff4b:
+        return wx;
+    case 0xffff:
+        return ie;
+    default:
+        break;
+    }
+    printf("cant find address ppu is looking for");
+    return 0xFF;
 }
 
 void AddressSpace::tickAPU(uint8_t cycles)
@@ -146,7 +195,7 @@ uint8_t AddressSpace::read(uint16_t address) {
     }
 
     if (address >= 0xD000 && address <= 0xDFFF) {
-        return wram[address - 0xD000];
+        return switchableRam[address - 0xD000];
     }
 
 
@@ -199,7 +248,7 @@ uint8_t AddressSpace::read(uint16_t address) {
 
     switch (address)
     {
-	case 0xff01:
+	case SB:
 		return sb;
 	case 0xff02:
 		return sc;
@@ -249,20 +298,10 @@ uint8_t AddressSpace::read(uint16_t address) {
     return 0xFF;
 }
 
-void AddressSpace::loadRom(std::string file_path){
-    std::ifstream inputFile(file_path, std::ios::binary);
-    std::vector<uint8_t> buffer((std::istreambuf_iterator<char>(inputFile)),
-        std::istreambuf_iterator<char>());
-    if (buffer.size() > 32768) {
-        printf("too big needs to be under %lld bytes but is %d bytes\n",SIZE,buffer.size());
-        return;
-    }
-    std::copy(buffer.begin(), buffer.end(), memory.begin());
-    inputFile.close();
-}
 
 
 
+// todo: manage side effects of register changing. i.e dma etc. think ti should just be dma and bootup rom disable
 void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     if (testMode && address == LY) {
         return;
@@ -296,21 +335,30 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         fixedRam[address - 0xC000] = value;
     }
         
-    // wrambank 1
+    //switchableRam
     if (address >= 0xD000 && address <= 0xDFFF) {
-        wram[address - 0xD000] = value;
+        switchableRam[address - 0xD000] = value;
+    }
+
+    if (address >= 0x8000 && address <= 0x9FFF) {
+        vram[address - 0x8000] = value;
     }
 
     if (address == 0xFF50 && value != 0) {
         if (debug) {
             printf("disabled bootup rom\n");
         }
+        printf("disabled bootup rom\n");
        
         inStartup = false;
     }
 
     if (address >= 0xFF10 && address <= 0xFF26) {
         apu.write(address, value);
+    }
+
+    if (address >= 0xFF80 && address <= 0xFFFE) {
+        hram[address - 0xFF80] = value;
     }
 
     switch (address)
@@ -354,9 +402,6 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     case 0xff45:
         lyc = value;
         return;
-    case 0xff46:
-        dma = value;
-        return;
     case 0xff47:
         bgp = value;
         return;
@@ -379,24 +424,26 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         break;
     }
 
-
+    if (address == 0xFF46) {
+        printf("initiated dma transfer\n");
+    }
 
 
     //some dma stuff
     // find some other way to do dma instead of using memroy
-    if (address == 0xFF46) {
-        //use to copy 160 bytes from given address to oam
-        uint16_t start_add = (uint16_t)value * 0x100;
+    //if (address == 0xFF46) {
+    //    //use to copy 160 bytes from given address to oam
+    //    uint16_t start_add = (uint16_t)value * 0x100;
 
-        // determine if this address belongs in rom/eram/ram/wram
+    //    // determine if this address belongs in rom/eram/ram/wram
 
-        if (value )
+    //    if (value )
 
-            
-        auto range = get_range(start_add, start_add + 160);
-        std::copy(range.begin(), range.end(), &memory[0xFE00]);
-        return;
-    }
+    //        
+    //    auto range = get_range(start_add, start_add + 160);
+    //    std::copy(range.begin(), range.end(), &memory[0xFE00]);
+    //    return;
+    //}
 
-    memory[address] = value;
+    return;
 }

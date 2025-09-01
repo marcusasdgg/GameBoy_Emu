@@ -8,7 +8,7 @@
 #include "APU.h"
 
 #define testMode false
-#define debug false
+#define debug true
 
 //registers
 #define P1JOYP 0xFF00
@@ -80,15 +80,9 @@ class AddressSpace{
 public:
 	
 	uint8_t read(uint16_t address);
-	void loadRom(std::string filePat);
-	//rename to address space...
-	void readRom(std::string file_path);
-	void saveRom(std::string file_path);
 	void write(uint16_t address, uint8_t value, bool iscpu = true);
 	AddressSpace(std::string bootupPath, std::string romPath, std::string savePath = "");
 	void setCpuWriteable(bool);
-	std::array<uint8_t,160> getOAM();
-	std::array<uint8_t, 6144> getVRAM();
 	void incr(uint16_t add);
 	
 
@@ -102,21 +96,10 @@ public:
 	void setIF(uint8_t iff);
 	void setSTAT(uint8_t stat);
 
-
-	void loadSave(std::string savePath);
+	// this function considers stuff to be in oam/ppu register stuff so should be faster then simple read
+	uint8_t getVRAMADD(uint16_t address);
 	void tickAPU(uint8_t cycles);
-private:
-	MBC* mbc;
-	APU apu;
-	std::array<bool, 8> buttonstate;
-	std::array<uint8_t, 256> bootupRom;
-	std::array<uint8_t, 8192> vram;
-	std::array<uint8_t, 4096> fixedRam;
-	std::array<uint8_t, 4096> switchableRam;
-	std::array<uint8_t, 160> oam;
-	std::array<uint8_t, 16> wram;
-	std::array<uint8_t, 126> hram;
-	
+
 	//lcd/graphic registers
 	uint8_t lcdc;
 	uint8_t stat;
@@ -153,7 +136,7 @@ private:
 	uint8_t nr50;
 	uint8_t nr51;
 	uint8_t nr52;
-	
+
 	//interrupt register
 	uint8_t ifr;
 	uint8_t ie;
@@ -170,6 +153,19 @@ private:
 
 	//joypad register
 	uint8_t joyp;
+private:
+	MBC* mbc;
+	APU apu;
+	std::array<bool, 8> buttonstate;
+	std::array<uint8_t, 256> bootupRom;
+	std::array<uint8_t, 8192> vram;
+	std::array<uint8_t, 4096> fixedRam;
+	std::array<uint8_t, 4096> switchableRam;
+	std::array<uint8_t, 160> oam;
+	std::array<uint8_t, 16> wram;
+	std::array<uint8_t, 127> hram;
+	
+	
 
 	
 	//unincluded vram DMA registers, BG/OBJ p[allettes, WRAM bank select (mainly just CGB stufF).

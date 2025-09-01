@@ -213,22 +213,22 @@ int main() {
 	auto elapsed_sec = std::chrono::duration_cast<std::chrono::seconds>(now - start).count();
 	printf("In %lld cycles missed %d frames\n", ck.get_cycle(), missedFrames);
 
-	std::vector<uint8_t> cpubytes = cpu.saveBytes();
-	printf("clock bytes starts at index %lld\n", cpubytes.size());
-	std::vector<uint8_t> clockbytes = ck.saveBytes();
-	printf("ppu bytes starts at index %lld\n", clockbytes.size() + cpubytes.size());
-	std::vector<uint8_t> ppuBytes = ppu.saveBytes();
-	printf("addr bytes starts at index %lld\n", ppuBytes.size() + cpubytes.size() + clockbytes.size());
-	std::vector<uint8_t> addrbytes = addr.saveBytes();
+	//std::vector<uint8_t> cpubytes = cpu.saveBytes();
+	//printf("clock bytes starts at index %lld\n", cpubytes.size());
+	//std::vector<uint8_t> clockbytes = ck.saveBytes();
+	//printf("ppu bytes starts at index %lld\n", clockbytes.size() + cpubytes.size());
+	//std::vector<uint8_t> ppuBytes = ppu.saveBytes();
+	//printf("addr bytes starts at index %lld\n", ppuBytes.size() + cpubytes.size() + clockbytes.size());
+	//std::vector<uint8_t> addrbytes = addr.saveBytes();
 
-	printf("saving %lld bytes", cpubytes.size() + clockbytes.size() + ppuBytes.size() + addrbytes.size());
-	// NOW COMBINE AND SAVE
-	std::ofstream outputFile(SAVEPATH, std::ios::binary);
-	outputFile.write(reinterpret_cast<const char*>(cpubytes.data()), cpubytes.size());
-	outputFile.write(reinterpret_cast<const char*>(clockbytes.data()), clockbytes.size());
-	outputFile.write(reinterpret_cast<const char*>(ppuBytes.data()), ppuBytes.size());
-	outputFile.write(reinterpret_cast<const char*>(addrbytes.data()), addrbytes.size());
-	outputFile.close();
+	//printf("saving %lld bytes", cpubytes.size() + clockbytes.size() + ppuBytes.size() + addrbytes.size());
+	//// NOW COMBINE AND SAVE
+	//std::ofstream outputFile(SAVEPATH, std::ios::binary);
+	//outputFile.write(reinterpret_cast<const char*>(cpubytes.data()), cpubytes.size());
+	//outputFile.write(reinterpret_cast<const char*>(clockbytes.data()), clockbytes.size());
+	//outputFile.write(reinterpret_cast<const char*>(ppuBytes.data()), ppuBytes.size());
+	//outputFile.write(reinterpret_cast<const char*>(addrbytes.data()), addrbytes.size());
+	/*outputFile.close();*/
 	//fclose(logFile);
 	cpu.print_registers();
 }

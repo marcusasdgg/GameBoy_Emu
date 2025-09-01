@@ -14,12 +14,12 @@ private:
 	uint16_t frequencyTimer = 0;
 	int16_t Volume = 0;
 
-	std::array<uint8_t, 0x10000>& waveRam;
+	std::array<uint8_t, 16>& waveRam;
 	const int wavePatternRamStart = 0xFF30;
 	uint16_t samplePtr = 0;
 
 public:
-	WaveChannel(std::array<uint8_t, 0x10000>& patternRam) : waveRam(patternRam) {};
+	WaveChannel(std::array<uint8_t, 16>& patternRam) : waveRam(patternRam) {};
 	void step();
 	void trigger();
 	void lengthclck();
