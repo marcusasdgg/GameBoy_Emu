@@ -165,7 +165,7 @@ uint8_t AddressSpace::getVRAMADD(uint16_t address)
 void AddressSpace::tickAPU(uint8_t cycles)
 {
     for (auto i = 0 ; i < cycles ; i++)
-        apu.tick(cycles);
+        apu.tick(1);
 }
 
 uint8_t AddressSpace::read(uint16_t address) {
@@ -424,26 +424,43 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         break;
     }
 
-    if (address == 0xFF46) {
-        printf("initiated dma transfer\n");
-    }
 
 
     //some dma stuff
     // find some other way to do dma instead of using memroy
-    //if (address == 0xFF46) {
-    //    //use to copy 160 bytes from given address to oam
-    //    uint16_t start_add = (uint16_t)value * 0x100;
+    if (address == 0xFF46) {
+        //use to copy 160 bytes from given address to oam
+        uint16_t start_add = (uint16_t)value * 0x100;
 
-    //    // determine if this address belongs in rom/eram/ram/wram
+        // determine if this address belongs in rom/eram/ram/wram
 
-    //    if (value )
+        // mbc/rom
+        if (start_add <= 0x7FFF || (start_add >= 0xA000 && start_add <= 0xBFFF)) {
+            for (int i = 0; i < 160; i++) {
+                oam[i] = mbc->read(start_add + i);
+            }
+        }
 
-    //        
-    //    auto range = get_range(start_add, start_add + 160);
-    //    std::copy(range.begin(), range.end(), &memory[0xFE00]);
-    //    return;
-    //}
+        if (start_add >= 0x8000 && start_add <= 0x9FFF) {
+            for (int i = 0; i < 160; i++) {
+                oam[i] = vram[i];
+            }
+        }
+
+        if (start_add >= 0xC000 && start_add <= 0xCFFF) {
+            for (int i = 0; i < 160; i++) {
+                oam[i] = fixedRam[i];
+            }
+        }
+
+        if (start_add >= 0xD000 && start_add <= 0xDFFF) {
+            for (int i = 0; i < 160; i++) {
+                oam[i] = switchableRam[i];
+            }
+        }
+
+        return;
+    }
 
     return;
 }

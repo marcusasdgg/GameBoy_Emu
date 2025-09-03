@@ -41,7 +41,7 @@ int main() {
 	//cpu.inititialise();
 	int missedFrames = 0;
 	int fps = 60 * FACTOR; // changes fps
-	uint64_t frequency = 4194304 * FACTOR; //4194304; //changes frequency
+	uint64_t frequency = 4194304;
 
 	uint64_t cycles_per_frame = frequency / fps;
 	auto target_frame_time = std::chrono::microseconds(1000000 / fps);
@@ -146,6 +146,8 @@ int main() {
 		addr.mapbuttons(buttonstate);
 
 
+
+
 		while (cycles_frame < cycles_per_frame) {
 
 			auto curr_cycle = ck.get_cycle();
@@ -172,8 +174,7 @@ int main() {
 
 
 
-		fps = 60 * FACTOR;
-		target_frame_time = std::chrono::microseconds(1000000 / fps);
+		
 
 
 		texture.update(frameImage);
@@ -182,6 +183,10 @@ int main() {
 		window.display();
 
 		ppu.resetBuffers();
+
+		fps = 60 * FACTOR;
+
+		target_frame_time = std::chrono::microseconds(1000000 / fps);
 
 		auto frame_end = std::chrono::high_resolution_clock::now();
 		auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(frame_end - frame_start);

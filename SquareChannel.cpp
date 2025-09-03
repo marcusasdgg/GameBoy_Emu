@@ -23,6 +23,11 @@ void SquareChannel::lengthclck()
 	}
 }
 
+void SquareChannel::envclck()
+{
+
+}
+
 int16_t SquareChannel::getVolume()
 {
 	if (!enabled)
@@ -47,9 +52,13 @@ void SquareChannel::trigger()
 {
 	enabled = true;
 	sequencePointer = 0;
-	timer = initial_length_timer;
-	if (lengthEnable && timer == 0) {
-		timer = 64; // or 256 for wave channel
+
+	// Initialize length counter properly
+	if (initial_length_timer == 0) {
+		timer = 64;  // full length
+	}
+	else {
+		timer = 64 - initial_length_timer;
 	}
 }
 

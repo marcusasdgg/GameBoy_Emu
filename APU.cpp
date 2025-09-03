@@ -9,9 +9,9 @@ void APU::stepFrameSequencer()
 		clockLengthCounters();
 	}
 
-	//if (frameSequencerStep == 7) {
-	//	clockVolumeEnvelopes();
-	//}
+	if (frameSequencerStep == 7) {
+		clockVolumeEnvelopes();
+	}
 
 
 	//if (frameSequencerStep == 0 || frameSequencerStep == 4) {
@@ -43,6 +43,12 @@ void APU::clockLengthCounters()
 	//	if (timer4 == 0)
 	//		disable1 = true;
 	//}
+}
+
+void APU::clockVolumeEnvelopes()
+{
+	channel1.envclck();
+	channel2.envclck();
 }
 
 APU::APU(std::array<uint8_t, 16>& fatBerg) : channel3(fatBerg)
@@ -192,7 +198,7 @@ void APU::tick(uint8_t cycles)
 
 	channel1.step(1);
 	channel2.step(1);
-	channel3.step();
+	//channel3.step();
 	//stepChannel3();
 	//stepChannel4();
 
@@ -204,10 +210,9 @@ void APU::tick(uint8_t cycles)
 		int16_t sample3 = channel3.getVolume();
 
 		int mixed = sample1 + sample2 + sample3;
-
 		if (mixed > 32767) mixed = 32767;
 		if (mixed < -32768) mixed = -32768;
-		stream.addSample((int16_t)sample3);
+		stream.addSample((int16_t)mixed	);
 	}
 
 }

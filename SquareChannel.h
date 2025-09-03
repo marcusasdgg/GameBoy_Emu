@@ -57,6 +57,7 @@ public:
 	void setLengthTimer(uint8_t val);
 
 	void lengthclck();
+	void envclck();
 	int16_t getVolume();
 };
 
