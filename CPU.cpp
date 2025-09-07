@@ -287,7 +287,6 @@ void CPU::interrupt_handler(){
 			advance_cycles(8);
 			switch (intr) {
 			case JOYPAD:
-				printf("joypad interrupt triggered\n");
 				PC = 0x60;
 				break;
 			case Serial:

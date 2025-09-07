@@ -12,8 +12,8 @@
 
 #define SAVEPATH "C:\\Users\\marcu\\Downloads\\saveFiles\\poo.POOSAVE"
 
-AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\tetris.gb");
-Clock ck(4000000,addr);
+AddressSpace addr("C:\\Users\\marcu\\Documents\\dmg_boot.bin","C:\\Users\\marcu\\Downloads\\interrupt_time.gb");
+Clock ck(4000000,addr); 
 CPU cpu(addr, ck);
 PPU ppu(addr,ck);
 const int SCREEN_WIDTH = 160;
@@ -22,7 +22,7 @@ FILE* logFile;
 sf::Color a[] = {sf::Color(181,175,66),sf::Color(145,155,58),sf::Color(93,120,46), sf::Color(58,81, 34) };
 
 
-int FACTOR = 2;
+int FACTOR = 1;
 
 //changes to make: ppu can return a texture or inplace mod a texture isntead.
 
@@ -67,7 +67,7 @@ int main() {
 
 	int frames = 0;
 
-
+	int sj = 0;
 	while (window.isOpen()) {
 		auto frame_start = std::chrono::high_resolution_clock::now();
 		int cycles_frame = 0;
@@ -141,13 +141,13 @@ int main() {
 			FACTOR = 20;
 		}
 		else {
-			FACTOR = 2;
+			FACTOR = 1;
 		}
 		addr.mapbuttons(buttonstate);
 
 
 
-
+		
 		while (cycles_frame < cycles_per_frame) {
 
 			auto curr_cycle = ck.get_cycle();

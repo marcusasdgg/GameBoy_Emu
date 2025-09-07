@@ -40,7 +40,7 @@ AddressSpace::AddressSpace(std::string bootPath, std::string romPath, std::strin
         std::istreambuf_iterator<char>());
     std::copy(buffer.begin(), buffer.end(),bootupRom.begin());
  
-    mbc = MBCFACTORY::createMBC(romPath,savePath);
+    mbc = new NOMBC(romPath, savePath);// MBCFACTORY::createMBC(romPath, savePath);
 }
 
 void AddressSpace::setCpuWriteable(bool cond){
@@ -115,13 +115,13 @@ uint8_t AddressSpace::getVRAMADD(uint16_t address)
 
     switch (address)
     {
-    case 0xff01:
+    case SB:
         return sb;
-    case 0xff02:
+    case SC:
         return sc;
-    case 0xff04:
+    case DIV:
         return div;
-    case 0xff05:
+    case TIMA:
         return tima;
     case 0xff06:
         return tma;
@@ -133,9 +133,9 @@ uint8_t AddressSpace::getVRAMADD(uint16_t address)
         return lcdc;
     case 0xff41:
         return stat;
-    case 0xff42:
+    case SCX:
         return scx;
-    case 0xff43:
+    case SCY:
         return scy;
     case 0xff44:
         return ly;
@@ -167,6 +167,7 @@ void AddressSpace::tickAPU(uint8_t cycles)
     for (auto i = 0 ; i < cycles ; i++)
         apu.tick(1);
 }
+
 
 uint8_t AddressSpace::read(uint16_t address) {
     // check rom bank 0
@@ -266,9 +267,9 @@ uint8_t AddressSpace::read(uint16_t address) {
 		return lcdc;
 	case 0xff41:
 		return stat;
-	case 0xff42:
+	case SCX:
 		return scx;
-	case 0xff43:
+	case SCY:
 		return scy;
 	case 0xff44:
 		return ly;
@@ -324,11 +325,11 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         joyp = byt;
     } 
 
-    if (isCPU && !cpuWriteable) {
-        if (address >= 0xFE00 && address <= 0xFE9F) {
-            return;
-        }
-    }
+    //if (isCPU && !cpuWriteable) {
+    //    if (address >= 0xFE00 && address <= 0xFE9F) {
+    //        return;
+    //    }
+    //}
 
     // wrambank 0
     if (address >= 0xC000 && address <= 0xCFFF) {
@@ -349,6 +350,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
             printf("disabled bootup rom\n");
         }
         printf("disabled bootup rom\n");
+        
        
         inStartup = false;
     }
@@ -357,10 +359,17 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         apu.write(address, value);
     }
 
+    if (address >= 0xFE00 && address <= 0xFE9F) {
+        oam[address - 0xFE00] = value;
+    }
+
+
     if (address >= 0xFF80 && address <= 0xFFFE) {
         hram[address - 0xFF80] = value;
     }
 
+
+    
     switch (address)
     {
     case 0xff01:
@@ -370,7 +379,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
         sc = value;
         return;
     case 0xff04:
-        div = value;
+        div = 0;
         return;
     case 0xff05:
         tima = value;
@@ -390,10 +399,10 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
     case 0xff41:
         stat = value;
         return;
-    case 0xff42:
+    case SCX:
         scx = value;
         return;
-    case 0xff43:
+    case SCY:
         scy = value;
         return;
     case 0xff44:
@@ -428,7 +437,7 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
 
     //some dma stuff
     // find some other way to do dma instead of using memroy
-    if (address == 0xFF46) {
+    if (address == DMA) {
         //use to copy 160 bytes from given address to oam
         uint16_t start_add = (uint16_t)value * 0x100;
 
@@ -443,19 +452,19 @@ void AddressSpace::write(uint16_t address, uint8_t value, bool isCPU) {
 
         if (start_add >= 0x8000 && start_add <= 0x9FFF) {
             for (int i = 0; i < 160; i++) {
-                oam[i] = vram[i];
+                oam[i] = vram[start_add - 0x8000 + i];
             }
         }
 
         if (start_add >= 0xC000 && start_add <= 0xCFFF) {
             for (int i = 0; i < 160; i++) {
-                oam[i] = fixedRam[i];
+                oam[i] = fixedRam[start_add - 0xC000 + i];
             }
         }
 
         if (start_add >= 0xD000 && start_add <= 0xDFFF) {
             for (int i = 0; i < 160; i++) {
-                oam[i] = switchableRam[i];
+                oam[i] = switchableRam[start_add - 0xD000 + i];
             }
         }
 

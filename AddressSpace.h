@@ -153,6 +153,7 @@ public:
 
 	//joypad register
 	uint8_t joyp;
+	bool inStartup = true;
 private:
 	MBC* mbc;
 	APU apu;
@@ -170,7 +171,7 @@ private:
 	
 	//unincluded vram DMA registers, BG/OBJ p[allettes, WRAM bank select (mainly just CGB stufF).
 
-	bool inStartup = true;
+	
 	bool cpuWriteable = false;
 };
 

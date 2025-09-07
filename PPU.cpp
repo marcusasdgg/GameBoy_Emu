@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <iterator>
 #include <fstream>
-#define SCANLINE_CYCLES 339
+#define SCANLINE_CYCLES 456
 
 //issues : stat interrupts don't really work, i.e LYC == LY
 PIXEL PPU::int_to_pixel(uint8_t pixel, uint16_t palAdd)
@@ -72,7 +72,6 @@ void PPU::setLYCFlag() {
 	}
 
 	if (lyc == scanline) {
-		printf("lyc == scanline %d\n", addr.getVRAMADD(LYC));
 		stat2 = true;
 		if (stat6) {
 			set_stat_interrupt();
@@ -516,85 +515,3 @@ std::array<std::array<PIXEL, 160>, 144> PPU::getDisplay()
 }
 
 
-
-
-//int currentScanline = addr.getVRAMADD(LY);
-//if (lcdc1 == 0) return;
-//
-//int renderedSprites = 0;
-//std::array<int, 160> pixelOwner;
-//std::fill(pixelOwner.begin(), pixelOwner.end(), -1);
-//for (int i = 0; i < 40; i++) {
-//	if (renderedSprites >= 10) break;
-//
-//	int spriteIndex = i * 4;
-//	int yPos = addr.getVRAMADD((uint16_t)(0xFE00 + spriteIndex)) - 16;
-//	int xPos = addr.getVRAMADD((uint16_t)(0xFE00 + spriteIndex + 1)) - 8;
-//	uint8_t tileIndex = addr.getVRAMADD((uint16_t)(0xFE00 + spriteIndex + 2));
-//	uint8_t attributes = addr.getVRAMADD((uint16_t)(0xFE00 + spriteIndex + 3));
-//
-//	int spriteHeight = (lcdc2) != 0 ? 16 : 8;
-//	if (currentScanline < yPos || currentScanline >= yPos + spriteHeight) {
-//		continue;
-//	}
-//
-//	int lineInSprite = currentScanline - yPos;
-//	if ((attributes & (1 << 6)) != 0) {
-//		lineInSprite = spriteHeight - 1 - lineInSprite;
-//	}
-//
-//	if (spriteHeight == 16) {
-//		tileIndex &= 0xFE;
-//		if (lineInSprite >= 8) {
-//			tileIndex += 1;
-//			lineInSprite -= 8;
-//		}
-//	}
-//
-//	uint16_t tileAddress = (uint16_t)(0x8000 + tileIndex * 16 + lineInSprite * 2);
-//	uint8_t tileLow = addr.getVRAMADD(tileAddress);
-//	uint8_t tileHigh = addr.getVRAMADD((uint16_t)(tileAddress + 1));
-//
-//	for (int x = 0; x < 8; x++) {
-//		int bitIndex = (attributes & (1 << 5)) != 0 ? x : 7 - x;
-//		int colorBit = ((tileHigh >> bitIndex) & 1) << 1 | ((tileLow >> bitIndex) & 1);
-//
-//		if (colorBit == 0) continue;
-//
-//		int screenX = xPos + x;
-//		if (screenX < 0 || screenX >= 160) continue;
-//
-//		bool bgOverObj = (attributes & (1 << 7)) != 0;
-//		if (bgOverObj && !(scanline_buffer[screenX] == PIXEL::GREEN0)) {
-//			continue;
-//		}
-//
-//		if (pixelOwner[screenX] == -1 || xPos < pixelOwner[screenX]) {
-//			pixelOwner[screenX] = xPos;
-//			bool isSpritePalette1 = (attributes & (1 << 4)) != 0;
-//
-//			uint8_t spritePalette = isSpritePalette1 ? addr.getVRAMADD(OBP1) : addr.getVRAMADD(OBP0);
-//			int paletteShift = colorBit * 2;
-//			int paletteColor = (spritePalette >> paletteShift) & 0b11;
-//
-//			switch (paletteColor) {
-//			case 0:
-//				scanline_buffer[screenX] = PIXEL::GREEN0;
-//				break;
-//			case 1:
-//				scanline_buffer[screenX] = PIXEL::GREEN1;
-//				break;
-//			case 2:
-//				scanline_buffer[screenX] = PIXEL::GREEN2;
-//				break;
-//			case 3:
-//				scanline_buffer[screenX] = PIXEL::GREEN3;
-//				break;
-//			default:
-//				printf("wtf color fucked\n");
-//				break;
-//			}
-//		}
-//	}
-//	renderedSprites++;
-//}

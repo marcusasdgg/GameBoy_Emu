@@ -3,18 +3,18 @@
 
 void WaveChannel::step()
 {
-	/*if (enabled) {
+	if (enabled) {
 		frequencyTimer --;
 		if (frequencyTimer <= 0) {
 			uint8_t data = get_bit_range(waveRam[samplePtr / 2], (samplePtr % 2) * 4, (samplePtr % 2 + 1) * 4 - 1);
-			printf("volume is %d\n", data);
+
 			Volume = (data * 2 - 1) * 2000;
 			frequencyTimer = (2048 - frequency) * 4 + frequencyTimer;
 			samplePtr++;
-			if (samplePtr == wavePatternRamStart + 32)
-				samplePtr = wavePatternRamStart;
+			if (samplePtr == 16)
+				samplePtr = 0;
 		}
-	}*/
+	}
 }
 
 void WaveChannel::trigger()
@@ -70,7 +70,7 @@ void WaveChannel::setPeriodLow(uint8_t data)
 
 uint8_t WaveChannel::getOutputLevel()
 {
-	return outputScale << 5;
+	return outputScale << 5; 
 }
 
 void WaveChannel::setOutputLevel(uint8_t data)

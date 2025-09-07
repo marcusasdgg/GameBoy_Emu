@@ -110,5 +110,4 @@ void SquareChannel::setLengthTimer(uint8_t val)
 {
 	waveduty = get_bit_range(val, 6, 7);
 	initial_length_timer = get_bit_range(val, 0, 5);
-	printf("setted length timer to %d and waveduty to %d", initial_length_timer, waveduty);
 }
